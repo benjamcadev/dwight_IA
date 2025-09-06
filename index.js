@@ -10,7 +10,7 @@ import { fileURLToPath } from 'url';
 import { products } from './bd.js'
 import readline from 'readline';
 import { extractVolumeFilters, extractCategoryFilters } from './helpers/filters.js';
-
+import { summarizeHistory } from './helpers/historyMessages.js'
 
 
 
@@ -20,6 +20,9 @@ const __dirname = path.dirname(__filename);
 
 // Historial Global para chatbot
 let conversationHistory = [];
+
+// Maxima cantidad de interraciones entre user y chatbot
+const MAX_MESSAGES = 10; // recordar que es x2 los mensajes, los del usuario + chatbot
 
 // Crear interfaz de lectura de consola
 const rl = readline.createInterface({
@@ -143,17 +146,13 @@ async function recommendProducts(query) {
     recommended = [products.find(p => p.id === result.neighbors[0])];
   }
 
+  //  Solo top-5 productos para no sobrecargar el prompt
+  recommended = recommended.slice(0, 5);
+
+
+
   // 3. Guardar en historial la consulta del usuario
   conversationHistory.push({ role: "user", content: query });
-
-
-  // 6. Preparar prompt (si vas a usar LLaMA u otro modelo después)
-  /*const prompt = `
-Eres un asistente que recomienda productos. 
-Pregunta del cliente: "${query}"
-Productos recomendados:(Cada producto va separado por un punto y coma) ${recommended.map(p => p.name +" "+p.description).join('; ')}
-Responde en español de manera amigable y útil.
-  `;*/
 
   // 4. Armar prompt con TODO el historial
   let prompt;
@@ -185,9 +184,22 @@ ${recommended.map(p => p.name + " " + p.description + " " + p.price).join("; ")}
   `;
   }
 
+
+  // Valida la cantidad de interacciones entre user y chatbot
+  if (conversationHistory.length >= MAX_MESSAGES) {
+    console.log("Historial muy largo, creando resumen...");
+
+    const summaryMessage = await summarizeHistory(conversationHistory, session);
+
+    // Mantienes solo últimos 5 mensajes + el resumen
+    const recentMessages = conversationHistory.slice(-5);
+    conversationHistory = [summaryMessage, ...recentMessages];
+  }
+
   console.log("Prompt:", prompt);
 
   const answer = await session.prompt(prompt);
+
 
   // 6. Guardar respuesta en historial
   conversationHistory.push({ role: "assistant", content: answer });
