@@ -1,0 +1,25 @@
+{
+  "name": "agroia",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@llama-node/llama-cpp": "^0.1.6",
+    "@xenova/transformers": "^2.17.2",
+    "hnswlib-node": "^3.0.0",
+    "llama-node": "^0.1.6",
+    "node-llama-cpp": "^3.12.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
