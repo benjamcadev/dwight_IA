@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 //BASE DE DATOS DE PRUEBA
 import { products } from './bd.js'
 import readline from 'readline';
-import { parseFiltersFromQuery } from './helpers/filters.js';
+import { extractVolumeFilters, extractCategoryFilters } from './helpers/filters.js';
 
 
 
@@ -88,47 +88,71 @@ const session = new LlamaChatSession({ contextSequence: context.getSequence() })
 //Función de recomendación
 // ------------------------
 async function recommendProducts(query) {
-    // Generar embedding de la consulta
-    const queryVector = await getEmbedding(query);
+  // 1. Generar embedding de la consulta
+  const queryVector = await getEmbedding(query);
 
-    // Buscar k productos más cercanos
-    const k = 5;
-    const result = hnsw.searchKnn(Array.from(queryVector), k);
-    const recommended = result.neighbors.map(id => products.find(p => p.id === id));
+  // 2. Buscar k productos más cercanos
+  const k = 10; // un poco más grande para que después filtres mejor
+  const result = hnsw.searchKnn(Array.from(queryVector), k);
+  let recommended = result.neighbors.map(id => products.find(p => p.id === id));
 
-    console.log(recommended)
+  console.log("Candidatos iniciales:", recommended);
 
-     //Extraer filtros desde el query
-  const filters = parseFiltersFromQuery(query);
+  // 3. Extraer filtros desde el query
+  const volumeFilters = extractVolumeFilters(query);
+  const categoryFilters = extractCategoryFilters(query);
+  const filters = { ...volumeFilters, ...categoryFilters };
 
-  console.log("Filtros: ",filters)
+  //console.log("Filtros detectados:", filters);
 
-  // 4. Aplicar filtros si existen
-  if (filters.capacity_ml) {
-    recommended = recommended.filter(p => p.capacity_ml && p.capacity_ml <= filters.capacity_ml);
+  // 4. Aplicar filtros
+  if (filters.exact_volume_ml) {
+    // Primero intentamos encontrar coincidencias exactas
+    const exactMatches = recommended.filter(
+      p => p.capacity_ml && p.capacity_ml === filters.exact_volume_ml
+    );
+    if (exactMatches.length > 0) {
+      recommended = exactMatches;
+    }
   }
-  if (filters.price_max) {
-    recommended = recommended.filter(p => p.price && p.price <= filters.price_max);
+
+  if (filters.min_volume_ml) {
+    recommended = recommended.filter(
+      p => p.capacity_ml && p.capacity_ml >= filters.min_volume_ml
+    );
   }
 
-  // Si después de filtrar no queda nada, devolvemos solo el más cercano
+  if (filters.max_volume_ml) {
+    recommended = recommended.filter(
+      p => p.capacity_ml && p.capacity_ml <= filters.max_volume_ml
+    );
+  }
+
+  if (filters.category) {
+    recommended = recommended.filter(
+      p => p.category && p.category.toLowerCase().includes(filters.category.toLowerCase())
+    );
+  }
+
+  // 5. Si después de filtrar no queda nada → devolvemos el más parecido semánticamente
   if (recommended.length === 0) {
     recommended = [products.find(p => p.id === result.neighbors[0])];
   }
 
-    // Preparar prompt para LLaMA
-    const prompt = `
+  // 6. Preparar prompt (si vas a usar LLaMA u otro modelo después)
+  const prompt = `
 Eres un asistente que recomienda productos. 
 Pregunta del cliente: "${query}"
-Productos recomendados: ${recommended.map(p => p.description).join(', ')}
+Productos recomendados:(Cada producto va separado por un punto y coma) ${recommended.map(p => p.name +" "+p.description).join('; ')}
 Responde en español de manera amigable y útil.
   `;
 
-    //console.log(prompt)
+  console.log("Prompt:", prompt);
 
-    // Generar respuesta
-    //const answer = await session.prompt(prompt);
-    //return answer;
+   const answer = await session.prompt(prompt);
+   return answer;
+
+  //return recommended; // si quieres solo probar
 }
 
 
