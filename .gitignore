@@ -13,7 +13,8 @@ dist-ssr
 *.local
 
 # modelos de ia
-models
+models/gemma-2-2b-it.q4_k_m.gguf
+models/llama-3.2-3b-instruct-q4_k_m.gguf
 
 # Editor directories and files
 .vscode/*
