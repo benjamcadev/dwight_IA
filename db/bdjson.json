@@ -1,0 +1,482 @@
+[
+  {
+    "id": 1,
+    "name": "Envase PP 250ml",
+    "description": "Envase de polipropileno con tapa, 250ml, ideal para salsas y postres.",
+    "category": "Plástico",
+    "price": 0.3,
+    "capacity_ml": 250
+  },
+  {
+    "id": 2,
+    "name": "Envase PP 500ml",
+    "description": "Envase de polipropileno con tapa, 500ml, apto para microondas.",
+    "category": "Plástico",
+    "price": 0.5,
+    "capacity_ml": 500
+  },
+  {
+    "id": 3,
+    "name": "Envase redondo PP 750ml",
+    "description": "Envase plástico resistente, 750ml, ideal para comidas preparadas.",
+    "category": "Plástico",
+    "price": 0.8,
+    "capacity_ml": 750
+  },
+  {
+    "id": 4,
+    "name": "Envase rectangular PP 1L",
+    "description": "Envase plástico rectangular con tapa, 1 litro, apto para congelar.",
+    "category": "Plástico",
+    "price": 1,
+    "capacity_ml": 1000
+  },
+  {
+    "id": 5,
+    "name": "Envase ovalado PP 600ml",
+    "description": "Envase ovalado de polipropileno, 600ml, ideal para ensaladas y guarniciones.",
+    "category": "Plástico",
+    "price": 0.75,
+    "capacity_ml": 600
+  },
+  {
+    "id": 6,
+    "name": "Envase transparente PP 400ml",
+    "description": "Envase de plástico transparente, 400ml, perfecto para postres y snacks.",
+    "category": "Plástico",
+    "price": 0.6,
+    "capacity_ml": 400
+  },
+  {
+    "id": 7,
+    "name": "Envase PP 1.5L",
+    "description": "Envase de polipropileno grande, 1.5 litros, apto para comidas familiares.",
+    "category": "Plástico",
+    "price": 1.5,
+    "capacity_ml": 1500
+  },
+  {
+    "id": 8,
+    "name": "Envase PP 2L",
+    "description": "Envase plástico resistente de 2 litros, ideal para catering.",
+    "category": "Plástico",
+    "price": 2,
+    "capacity_ml": 2000
+  },
+  {
+    "id": 9,
+    "name": "Envase sushi 4 piezas",
+    "description": "Envase rectangular para sushi, capacidad 4 piezas, tapa transparente.",
+    "category": "Sushi/Comida Asiática",
+    "price": 0.8,
+    "capacity_ml": null
+  },
+  {
+    "id": 10,
+    "name": "Envase sushi 6 piezas",
+    "description": "Envase rectangular para sushi, capacidad 6 piezas, tapa incluida.",
+    "category": "Sushi/Comida Asiática",
+    "price": 1,
+    "capacity_ml": null
+  },
+  {
+    "id": 11,
+    "name": "Envase sushi 8 piezas",
+    "description": "Envase plástico para sushi, capacidad 8 piezas, tapa transparente.",
+    "category": "Sushi/Comida Asiática",
+    "price": 1.2,
+    "capacity_ml": null
+  },
+  {
+    "id": 12,
+    "name": "Envase comida china 500ml",
+    "description": "Envase plástico con tapa, 500ml, ideal para noodles y arroz frito.",
+    "category": "Sushi/Comida Asiática",
+    "price": 0.6,
+    "capacity_ml": 500
+  },
+  {
+    "id": 13,
+    "name": "Envase comida china 1L",
+    "description": "Envase grande para comida china, 1 litro, tapa hermética.",
+    "category": "Sushi/Comida Asiática",
+    "price": 1.2,
+    "capacity_ml": 1000
+  },
+  {
+    "id": 14,
+    "name": "Vaso cartón 250ml",
+    "description": "Vaso de cartón para café, 250ml, biodegradable.",
+    "category": "Vasos",
+    "price": 0.25,
+    "capacity_ml": 250
+  },
+  {
+    "id": 15,
+    "name": "Vaso cartón 350ml con tapa",
+    "description": "Vaso de cartón, 350ml, ideal para bebidas calientes.",
+    "category": "Vasos",
+    "price": 0.3,
+    "capacity_ml": 350
+  },
+  {
+    "id": 16,
+    "name": "Vaso PLA 300ml",
+    "description": "Vaso biodegradable de PLA, 300ml, apto para bebidas frías.",
+    "category": "Vasos",
+    "price": 0.35,
+    "capacity_ml": 300
+  },
+  {
+    "id": 17,
+    "name": "Vaso PLA 400ml",
+    "description": "Vaso transparente de PLA, 400ml, ideal para jugos y smoothies.",
+    "category": "Vasos",
+    "price": 0.4,
+    "capacity_ml": 400
+  },
+  {
+    "id": 18,
+    "name": "Vaso PET 500ml",
+    "description": "Vaso de PET transparente, 500ml, reutilizable para bebidas frías.",
+    "category": "Vasos",
+    "price": 0.5,
+    "capacity_ml": 500
+  },
+  {
+    "id": 19,
+    "name": "Vaso PP 600ml",
+    "description": "Vaso de polipropileno, 600ml, resistente y reutilizable.",
+    "category": "Vasos",
+    "price": 0.55,
+    "capacity_ml": 600
+  },
+  {
+    "id": 20,
+    "name": "Vaso cartón 400ml sin tapa",
+    "description": "Vaso de cartón, 400ml, ideal para café o té.",
+    "category": "Vasos",
+    "price": 0.28,
+    "capacity_ml": 400
+  },
+  {
+    "id": 21,
+    "name": "Bolsa camiseta pequeña",
+    "description": "Bolsa tipo camiseta, medida 25x35cm, color blanco.",
+    "category": "Bolsas",
+    "price": 0.1,
+    "capacity_ml": null
+  },
+  {
+    "id": 22,
+    "name": "Bolsa camiseta mediana",
+    "description": "Bolsa tipo camiseta, medida 30x40cm, color blanco.",
+    "category": "Bolsas",
+    "price": 0.12,
+    "capacity_ml": null
+  },
+  {
+    "id": 23,
+    "name": "Bolsa camiseta grande",
+    "description": "Bolsa tipo camiseta, medida 35x50cm, color blanco.",
+    "category": "Bolsas",
+    "price": 0.15,
+    "capacity_ml": null
+  },
+  {
+    "id": 24,
+    "name": "Bolsa zip 10x15cm",
+    "description": "Bolsa con cierre zip, 10x15cm, transparente.",
+    "category": "Bolsas",
+    "price": 0.05,
+    "capacity_ml": null
+  },
+  {
+    "id": 25,
+    "name": "Bolsa zip 15x20cm",
+    "description": "Bolsa con cierre zip, 15x20cm, transparente.",
+    "category": "Bolsas",
+    "price": 0.08,
+    "capacity_ml": null
+  },
+  {
+    "id": 26,
+    "name": "Bolsa papel kraft 20x30cm",
+    "description": "Bolsa de papel kraft, 20x30cm, ideal para comida para llevar.",
+    "category": "Bolsas",
+    "price": 0.12,
+    "capacity_ml": null
+  },
+  {
+    "id": 27,
+    "name": "Bolsa papel kraft 25x40cm",
+    "description": "Bolsa de papel kraft, 25x40cm, resistente.",
+    "category": "Bolsas",
+    "price": 0.15,
+    "capacity_ml": null
+  },
+  {
+    "id": 28,
+    "name": "Bolsa reutilizable tela 35x40cm",
+    "description": "Bolsa de tela reutilizable, 35x40cm, resistente y ecológica.",
+    "category": "Bolsas",
+    "price": 0.5,
+    "capacity_ml": null
+  },
+  {
+    "id": 29,
+    "name": "Envase redondo PP 100ml",
+    "description": "Pequeño envase de polipropileno, 100ml, ideal para salsas.",
+    "category": "Plástico",
+    "price": 0.2,
+    "capacity_ml": 100
+  },
+  {
+    "id": 30,
+    "name": "Envase redondo PP 200ml",
+    "description": "Envase plástico redondo, 200ml, para snacks y salsas.",
+    "category": "Plástico",
+    "price": 0.25,
+    "capacity_ml": 200
+  },
+  {
+    "id": 31,
+    "name": "Envase rectangular PP 300ml",
+    "description": "Envase plástico rectangular, 300ml, con tapa.",
+    "category": "Plástico",
+    "price": 0.3,
+    "capacity_ml": 300
+  },
+  {
+    "id": 32,
+    "name": "Envase ovalado PP 400ml",
+    "description": "Envase ovalado de polipropileno, 400ml, ideal para guarniciones.",
+    "category": "Plástico",
+    "price": 0.4,
+    "capacity_ml": 400
+  },
+  {
+    "id": 33,
+    "name": "Envase transparente PP 500ml",
+    "description": "Envase de polipropileno transparente, 500ml, resistente.",
+    "category": "Plástico",
+    "price": 0.5,
+    "capacity_ml": 500
+  },
+  {
+    "id": 34,
+    "name": "Envase sushi 10 piezas",
+    "description": "Envase rectangular para sushi, capacidad 10 piezas, tapa transparente.",
+    "category": "Sushi/Comida Asiática",
+    "price": 1.5,
+    "capacity_ml": null
+  },
+  {
+    "id": 35,
+    "name": "Envase comida china 750ml",
+    "description": "Envase plástico con tapa, 750ml, ideal para noodles y arroz.",
+    "category": "Sushi/Comida Asiática",
+    "price": 0.8,
+    "capacity_ml": 750
+  },
+  {
+    "id": 36,
+    "name": "Envase comida china 1.5L",
+    "description": "Envase plástico grande, 1.5 litros, apto para delivery.",
+    "category": "Sushi/Comida Asiática",
+    "price": 1.5,
+    "capacity_ml": 1500
+  },
+  {
+    "id": 37,
+    "name": "Vaso PLA 200ml",
+    "description": "Vaso biodegradable PLA, 200ml, apto para bebidas frías.",
+    "category": "Vasos",
+    "price": 0.2,
+    "capacity_ml": 200
+  },
+  {
+    "id": 38,
+    "name": "Vaso PET 300ml",
+    "description": "Vaso transparente PET, 300ml, reutilizable.",
+    "category": "Vasos",
+    "price": 0.25,
+    "capacity_ml": 300
+  },
+  {
+    "id": 39,
+    "name": "Vaso PP 400ml",
+    "description": "Vaso de polipropileno, 400ml, resistente.",
+    "category": "Vasos",
+    "price": 0.35,
+    "capacity_ml": 400
+  },
+  {
+    "id": 40,
+    "name": "Vaso cartón 300ml",
+    "description": "Vaso de cartón, 300ml, biodegradable.",
+    "category": "Vasos",
+    "price": 0.22,
+    "capacity_ml": 300
+  },
+  {
+    "id": 41,
+    "name": "Bolsa zip 20x30cm",
+    "description": "Bolsa con cierre zip, 20x30cm, transparente.",
+    "category": "Bolsas",
+    "price": 0.1,
+    "capacity_ml": null
+  },
+  {
+    "id": 42,
+    "name": "Bolsa zip 25x35cm",
+    "description": "Bolsa con cierre zip, 25x35cm, transparente.",
+    "category": "Bolsas",
+    "price": 0.12,
+    "capacity_ml": null
+  },
+  {
+    "id": 43,
+    "name": "Bolsa papel kraft 30x40cm",
+    "description": "Bolsa de papel kraft, 30x40cm, resistente.",
+    "category": "Bolsas",
+    "price": 0.18,
+    "capacity_ml": null
+  },
+  {
+    "id": 44,
+    "name": "Bolsa tela 40x45cm",
+    "description": "Bolsa de tela reutilizable, 40x45cm, resistente y ecológica.",
+    "category": "Bolsas",
+    "price": 0.55,
+    "capacity_ml": null
+  },
+  {
+    "id": 45,
+    "name": "Envase redondo PP 600ml",
+    "description": "Envase de polipropileno, 600ml, ideal para ensaladas y postres.",
+    "category": "Plástico",
+    "price": 0.65,
+    "capacity_ml": 600
+  },
+  {
+    "id": 46,
+    "name": "Envase ovalado PP 800ml",
+    "description": "Envase ovalado de polipropileno, 800ml, apto para microondas.",
+    "category": "Plástico",
+    "price": 0.9,
+    "capacity_ml": 800
+  },
+  {
+    "id": 47,
+    "name": "Envase rectangular PP 1.2L",
+    "description": "Envase rectangular de plástico, 1.2 litros, apto para comidas familiares.",
+    "category": "Plástico",
+    "price": 1.2,
+    "capacity_ml": 1200
+  },
+  {
+    "id": 48,
+    "name": "Envase sushi 12 piezas",
+    "description": "Envase plástico para sushi, capacidad 12 piezas, tapa incluida.",
+    "category": "Sushi/Comida Asiática",
+    "price": 1.8,
+    "capacity_ml": null
+  },
+  {
+    "id": 49,
+    "name": "Envase comida china 2L",
+    "description": "Envase grande de comida china, 2 litros, apto para delivery.",
+    "category": "Sushi/Comida Asiática",
+    "price": 2,
+    "capacity_ml": 2000
+  },
+  {
+    "id": 50,
+    "name": "Vaso PLA 500ml",
+    "description": "Vaso biodegradable PLA, 500ml, ideal para smoothies y jugos.",
+    "category": "Vasos",
+    "price": 0.45,
+    "capacity_ml": 500
+  },
+  {
+    "id": 51,
+    "name": "Vaso cartón 450ml",
+    "description": "Vaso de cartón, 450ml, biodegradable, apto para café o té.",
+    "category": "Vasos",
+    "price": 0.35,
+    "capacity_ml": 450
+  },
+  {
+    "id": 52,
+    "name": "Vaso PET 600ml",
+    "description": "Vaso de PET transparente, 600ml, reutilizable.",
+    "category": "Vasos",
+    "price": 0.55,
+    "capacity_ml": 600
+  },
+  {
+    "id": 53,
+    "name": "Bolsa zip 30x40cm",
+    "description": "Bolsa con cierre zip, 30x40cm, transparente.",
+    "category": "Bolsas",
+    "price": 0.15,
+    "capacity_ml": null
+  },
+  {
+    "id": 54,
+    "name": "Bolsa papel kraft 35x50cm",
+    "description": "Bolsa de papel kraft, 35x50cm, resistente.",
+    "category": "Bolsas",
+    "price": 0.2,
+    "capacity_ml": null
+  },
+  {
+    "id": 55,
+    "name": "Bolsa tela 45x50cm",
+    "description": "Bolsa de tela reutilizable, 45x50cm, resistente y ecológica.",
+    "category": "Bolsas",
+    "price": 0.6,
+    "capacity_ml": null
+  },
+  {
+    "id": 56,
+    "name": "Envase PP 3L",
+    "description": "Envase plástico grande, 3 litros, apto para microondas y congelador.",
+    "category": "Plástico",
+    "price": 2,
+    "capacity_ml": 3000
+  },
+  {
+    "id": 57,
+    "name": "Envase PP 4L",
+    "description": "Envase plástico extra grande, 4 litros, apto para catering.",
+    "category": "Plástico",
+    "price": 2.5,
+    "capacity_ml": 4000
+  },
+  {
+    "id": 58,
+    "name": "Vaso PLA 600ml",
+    "description": "Vaso biodegradable PLA, 600ml, ideal para jugos fríos.",
+    "category": "Vasos",
+    "price": 0.5,
+    "capacity_ml": 600
+  },
+  {
+    "id": 59,
+    "name": "Bolsa zip 35x45cm",
+    "description": "Bolsa con cierre zip, 35x45cm, transparente.",
+    "category": "Bolsas",
+    "price": 0.18,
+    "capacity_ml": null
+  },
+  {
+    "id": 60,
+    "name": "Bolsa papel kraft 40x60cm",
+    "description": "Bolsa de papel kraft, 40x60cm, resistente.",
+    "category": "Bolsas",
+    "price": 0.25,
+    "capacity_ml": null
+  }
+]

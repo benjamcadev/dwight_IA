@@ -6,14 +6,17 @@ import { summarizeHistory } from '../helpers/historyMessages.js'
 //Función de recomendación
 // ------------------------
 export async function recommendProducts(query, hnsw, products, session) {
-    console.log(hnsw)
+    
   // 1. Generar embedding de la consulta
   const queryVector = await getEmbedding(query);
 
   // 2. Buscar k productos más cercanos
   const k = 10; // un poco más grande para que después filtres mejor
   const result = hnsw.searchKnn(Array.from(queryVector), k);
+  
   let recommended = result.neighbors.map(id => products.find(p => p.id === id));
+
+  console.log("Productos desde el vector: " + recommended)
 
   //console.log("Candidatos iniciales:", recommended);
 

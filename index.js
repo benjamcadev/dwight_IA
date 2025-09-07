@@ -4,7 +4,11 @@ const { Llama } = pkgllama;
 
 
 //BASE DE DATOS DE PRUEBA
-import { products } from './db/bd.js'
+//import { products } from './db/bd.js'
+import fs from 'fs';
+const raw = fs.readFileSync('./db/products_agro.json', 'utf-8');
+const products = JSON.parse(raw);
+
 import readline from 'readline';
 
 import { initHnsw } from './models/initHnsw.js';

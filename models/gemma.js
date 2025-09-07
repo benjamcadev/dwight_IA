@@ -1,6 +1,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getLlama, LlamaChatSession } from 'node-llama-cpp';
+import os from "os";
 
 
 // Configuracion de rutas
@@ -13,12 +14,15 @@ export async function initModel() {
 
     console.log("Cargando LLM llama-node con modelo gemma-2-2b-it.q4")
 
+    const numCpus = os.cpus().length; // Obtener cantidad de nucleos del proce
+
     // Configurar LLM local (llama-node)
     const llama = await getLlama();
     const model = await llama.loadModel({
         modelPath: path.join(__dirname, 'gemma-2-2b-it.q4_k_m.gguf'),
         // Opciones de rendimiento:
-        nThreads: 8,      // usa los 8 núcleos del M1
+        nThreads: numCpus,      
+        nBatch: 256, // tokens que procesa en paralelo 
     });
     const context = await model.createContext();
     const session = new LlamaChatSession({ contextSequence: context.getSequence() });
