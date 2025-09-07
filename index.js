@@ -85,7 +85,10 @@ console.log("Cargando LLM llama-node")
 // Configurar LLM local (llama-node)
 const llama = await getLlama();
 const model = await llama.loadModel({
-  modelPath: path.join(__dirname, 'models', 'llama-3.2-3b-instruct-q4_k_m.gguf')
+  modelPath: path.join(__dirname, 'models', 'gemma-2-2b-it.q4_k_m.gguf'),
+   // Opciones de rendimiento:
+  nThreads: 8,      // usa los 8 núcleos del M1
+  nBatch: 512,      // batch size (ajusta entre 256–1024)
 });
 const context = await model.createContext();
 const session = new LlamaChatSession({ contextSequence: context.getSequence() });
