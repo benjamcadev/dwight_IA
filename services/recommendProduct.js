@@ -1,19 +1,24 @@
 import { getEmbedding } from '../helpers/embeddings.js'
 import { extractVolumeFilters, extractCategoryFilters } from '../helpers/filters.js';
-import { conversationHistory , MAX_MESSAGES} from '../config/constants.js'
+import { conversationHistory, MAX_MESSAGES } from '../config/constants.js'
 import { summarizeHistory } from '../helpers/historyMessages.js'
-import { isAmbiguousQuery } from '../helpers/queryUtils.js';
+import { isAmbiguousQuery, normalizeText } from '../helpers/queryUtils.js';
+
 
 //Función de recomendación
 // ------------------------
 export async function recommendProducts(query, hnsw, products, session) {
-     let queryVector;
+
+  // --- Normalizar query ---
+  query = normalizeText(query)
+
+  let queryVector;
 
   // --- Detectar si la query es ambigua ---
-  if(isAmbiguousQuery(query)){
-     console.log("⚠️ Query ambigua detectada, usando categoría previa");
+  if (isAmbiguousQuery(query)) {
+    console.log("⚠️ Query ambigua detectada, usando categoría previa");
     queryVector = session.lastCategoryVector;
-  }else{
+  } else {
     queryVector = await getEmbedding(query);
     session.lastCategoryVector = queryVector;
   }
@@ -22,19 +27,38 @@ export async function recommendProducts(query, hnsw, products, session) {
   // --- Buscar k productos más cercanos --- 
   const k = 15; // cantidad de productos que devuelve el vector
   const result = hnsw.searchKnn(Array.from(queryVector), k);
-  
+
+  // Calcular score de similitud coseno para cada resultado
+  const rescored = result.neighbors.map(id => {
+    const product = products.find(p => p.id === id);
+    const productVector = hnsw.getPoint(id); // Recupera el vector del índice
+
+    return {
+      ...product,
+      score: cosineSimilarity(queryVector, productVector)
+    };
+  });
+
+  // Ordenar por score descendente
+  rescored.sort((a, b) => b.score - a.score);
+
+  // Filtro: solo productos con score > 0.70
+  const filtered = rescored.filter(r => r.score >= 0.70);
+
+  console.log(filtered)
+
+
+
+
   let recommended = result.neighbors.map(id => products.find(p => p.id === id));
 
-  //console.log("Productos recomendados: ", recommended)
-
-  
+  console.log("Productos recomendados: ", recommended)
 
   // 3. Extraer filtros desde el query
   const volumeFilters = extractVolumeFilters(query);
   const categoryFilters = extractCategoryFilters(query);
   const filters = { ...volumeFilters, ...categoryFilters };
 
-  //console.log("Filtros detectados:", filters);
 
   // 4. Aplicar filtros
   if (filters.exact_volume_ml) {
@@ -93,7 +117,7 @@ Saluda al usuario de manera amable y responde a su consulta.
 Mantén la conversación en español, clara y amigable.
 
 Productos recomendados: (Cada producto va separado por un punto y coma): 
-${recommended.map(p => p.name + " " + p.description).join("; ")}
+${recommended.map(p => "Nombre: " + p.name + " Descripcion: " + p.additional_information + " Categoria: " + p.category + " Precio: " + p.price).join("; ")}
   `;
   } else {
     // Conversación en curso
@@ -107,7 +131,7 @@ Historial:
 ${conversationHistory.map(m => `${m.role}: ${m.content}`).join("\n")}
 
 Productos recomendados: (Cada producto va separado por un punto y coma): 
-${recommended.map(p => "Nombre: " + p.name + "Descripcion: " + p.description + "Precio: " + p.price).join("; ")}
+${recommended.map(p => "Nombre: " + p.name + " Descripcion: " + p.additional_information + " Categoria: " + p.category + " Precio: " + p.price).join("; ")}
   `;
   }
 
@@ -126,14 +150,27 @@ ${recommended.map(p => "Nombre: " + p.name + "Descripcion: " + p.description + "
   console.log("Prompt:", prompt);
 
   const answer = await session.prompt(prompt, {
-  nBatch: 8 // default es 8 o 16
-});
+    nBatch: 8 // default es 8 o 16
+  });
 
-  
+
   // 6. Guardar respuesta en historial
   conversationHistory.push({ role: "assistant", content: answer });
 
   return answer;
 
   //return recommended; // si quieres solo probar
+}
+
+
+function cosineSimilarity(vecA, vecB) {
+  let dot = 0.0;
+  let normA = 0.0;
+  let normB = 0.0;
+  for (let i = 0; i < vecA.length; i++) {
+    dot += vecA[i] * vecB[i];
+    normA += vecA[i] * vecA[i];
+    normB += vecB[i] * vecB[i];
+  }
+  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }

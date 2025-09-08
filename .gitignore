@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# variables locales
+.env
+
 # modelos de ia
 models/gemma-2-2b-it.q4_k_m.gguf
 models/llama-3.2-3b-instruct-q4_k_m.gguf

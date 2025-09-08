@@ -15,3 +15,14 @@ export function isAmbiguousQuery(query) {
 function removeAccents(str) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
+
+export function normalizeText(s) {
+  if (!s) return "";
+  return s
+    .toLowerCase()
+    .normalize("NFD")                 // separar acentos
+    .replace(/[\u0300-\u036f]/g, "")  // quitar acentos
+    .replace(/[^\p{L}\p{N}\s]/gu, "") // quitar puntuación
+    .replace(/\s+/g, " ")
+    .trim();
+}

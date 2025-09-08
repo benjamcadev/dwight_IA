@@ -1,10 +1,9 @@
-
 import pkgllama from 'llama-node';
 const { Llama } = pkgllama;
 
+import 'dotenv/config';
 
-//BASE DE DATOS DE PRUEBA
-//import { products } from './db/bd.js'
+//BD de prueba json
 import fs from 'fs';
 const raw = fs.readFileSync('./db/products_agro.json', 'utf-8');
 const products = JSON.parse(raw);
