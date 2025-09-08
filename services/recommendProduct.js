@@ -2,23 +2,32 @@ import { getEmbedding } from '../helpers/embeddings.js'
 import { extractVolumeFilters, extractCategoryFilters } from '../helpers/filters.js';
 import { conversationHistory , MAX_MESSAGES} from '../config/constants.js'
 import { summarizeHistory } from '../helpers/historyMessages.js'
+import { isAmbiguousQuery } from '../helpers/queryUtils.js';
 
 //Función de recomendación
 // ------------------------
 export async function recommendProducts(query, hnsw, products, session) {
-    
-  // 1. Generar embedding de la consulta
-  const queryVector = await getEmbedding(query);
+     let queryVector;
 
-  // 2. Buscar k productos más cercanos
-  const k = 10; // un poco más grande para que después filtres mejor
+  // --- Detectar si la query es ambigua ---
+  if(isAmbiguousQuery(query)){
+     console.log("⚠️ Query ambigua detectada, usando categoría previa");
+    queryVector = session.lastCategoryVector;
+  }else{
+    queryVector = await getEmbedding(query);
+    session.lastCategoryVector = queryVector;
+  }
+
+
+  // --- Buscar k productos más cercanos --- 
+  const k = 15; // cantidad de productos que devuelve el vector
   const result = hnsw.searchKnn(Array.from(queryVector), k);
   
   let recommended = result.neighbors.map(id => products.find(p => p.id === id));
 
-  console.log("Productos desde el vector: " + recommended)
+  //console.log("Productos recomendados: ", recommended)
 
-  //console.log("Candidatos iniciales:", recommended);
+  
 
   // 3. Extraer filtros desde el query
   const volumeFilters = extractVolumeFilters(query);
@@ -62,8 +71,10 @@ export async function recommendProducts(query, hnsw, products, session) {
     recommended = [products.find(p => p.id === result.neighbors[0])];
   }
 
+  //console.log("Productos despues de los filtros: ", recommended)
+
   //  Solo top-5 productos para no sobrecargar el prompt
-  recommended = recommended.slice(0, 5);
+  recommended = recommended.slice(0, 10);
 
 
 
@@ -118,7 +129,7 @@ ${recommended.map(p => "Nombre: " + p.name + "Descripcion: " + p.description + "
   nBatch: 8 // default es 8 o 16
 });
 
-
+  
   // 6. Guardar respuesta en historial
   conversationHistory.push({ role: "assistant", content: answer });
 
