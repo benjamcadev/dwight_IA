@@ -12,6 +12,8 @@ export async function recommendProducts(query, hnsw, products, session) {
   // --- Normalizar query ---
   query = normalizeText(query)
 
+  console.log("Query normalizada: ", query)
+
   let queryVector;
 
   // --- Detectar si la query es ambigua ---
@@ -43,16 +45,13 @@ export async function recommendProducts(query, hnsw, products, session) {
   rescored.sort((a, b) => b.score - a.score);
 
   // Filtro: solo productos con score > 0.70
-  const filtered = rescored.filter(r => r.score >= 0.70);
+  let recommended = rescored.filter(r => r.score >= 0.45);
 
-  console.log(filtered)
-
-
+  console.log("Productos filtrados por Score: ", recommended)
 
 
-  let recommended = result.neighbors.map(id => products.find(p => p.id === id));
-
-  console.log("Productos recomendados: ", recommended)
+  //let recommended = result.neighbors.map(id => products.find(p => p.id === id));
+  //console.log("Productos recomendados: ", recommended)
 
   // 3. Extraer filtros desde el query
   const volumeFilters = extractVolumeFilters(query);
@@ -83,11 +82,11 @@ export async function recommendProducts(query, hnsw, products, session) {
     );
   }
 
-  if (filters.category) {
+  /*if (filters.category) {
     recommended = recommended.filter(
       p => p.category && p.category.toLowerCase().includes(filters.category.toLowerCase())
     );
-  }
+  }*/
 
 
   // 5. Si después de filtrar no queda nada → devolvemos el más parecido semánticamente
@@ -97,7 +96,7 @@ export async function recommendProducts(query, hnsw, products, session) {
 
   //console.log("Productos despues de los filtros: ", recommended)
 
-  //  Solo top-5 productos para no sobrecargar el prompt
+  //  Solo top-10 productos para no sobrecargar el prompt
   recommended = recommended.slice(0, 10);
 
 

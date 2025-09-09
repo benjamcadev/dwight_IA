@@ -19,7 +19,8 @@ hnsw.initIndex(products.length);
 // Agregar productos al índice con HNSW
 for (const product of products) {
   //const vector = await getEmbedding(product.description);
-  const vector = await getEmbedding("Nombre: " + product.name + " Categoria: " +product.category + " Informacion Adicional: " + product.additional_information);
+  const textProduct = `${product.name}. ${product.additional_information || ""}. Categoría: ${product.category || ""}`;
+  const vector = await getEmbedding(textProduct);
   hnsw.addPoint(Array.from(vector), product.id);
 }
 

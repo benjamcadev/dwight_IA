@@ -15,5 +15,8 @@ export const AMBIGUOUS_QUERIES = [
   "otro producto",
   "otra opción",
   "tienen otras opciones",
-  "tienes mas opciones"
+  "tienes mas opciones",
+  "que opciones tienes",
+  "que opciones",
+  "mas opciones"
 ];
