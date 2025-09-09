@@ -1,5 +1,10 @@
 import { pipeline } from "@xenova/transformers";
-const embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L12-v2");
+
+
+
+const embedder = await pipeline("feature-extraction", "Xenova/multilingual-e5-large");
+
+//const embedder = await pipeline("feature-extraction", "Xenova/sirius422-multilingual-e5-large-onnx");
 
 
 // Funcion para convertir a vectores

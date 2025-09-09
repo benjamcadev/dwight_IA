@@ -8,9 +8,9 @@ export async function initHnsw(products){
 
 // Configurar HNSW, Agregando y convirtiendo a vectores los productos
 
-console.log("Cargando HNSW, indexando productos")
+console.log("Cargando HNSW, indexando productos.")
 
-const dim = 384;
+const dim = 1024;
 const space = "cosine";
 const hnsw = new HierarchicalNSW(space, dim);
 

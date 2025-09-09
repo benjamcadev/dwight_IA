@@ -23,7 +23,6 @@ export function normalizeText(s) {
     .normalize("NFD")                 // separar acentos
     .replace(/[\u0300-\u036f]/g, "")  // quitar acentos
     .replace(/[^\p{L}\p{N}\s]/gu, "") // quitar puntuación
-    .replace(/\b(\w{3,})s\b/g, "$1")  // quitar plural simple en 's'
     .replace(/\s+/g, " ")
     .trim();
 }
