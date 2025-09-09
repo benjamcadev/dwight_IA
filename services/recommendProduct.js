@@ -11,8 +11,34 @@ export async function recommendProducts(query, hnsw, products, session) {
 
   // --- Normalizar query ---
   query = normalizeText(query)
-
   console.log("Query normalizada: ", query)
+
+  const llmPrompt = `
+Eres un asistente de una tienda que solo vende productos de estas categorías: AGRÍCOLA, ALUMINIO, ASEO Y LIMPIEZA, BATERIAS, BOLSAS, COTILLÓN, ECOLÓGICO, ELECTRODOMÉSTICOS, ELEMENTOS DE PROTECCIÓN, EMBALAJES Y ETIQUETAS, ENVASES, EQUIPAMIENTO GASTRONÓMICO, ESPUMADO, FLORERÍA, FRASCOS Y BOTELLAS, KRAFT, LIBRERÍA
+MAQUINARIA INDUSTRIAL, MOLDES, PLÁSTICO, REPOSTERÍA, TISSUE, VASOS / CUBIERTOS, PAPELERIA.
+Si el usuario pregunta por algo que no tenemos, responde claramente y amablemente que no lo vendemos, y luego preguntar si lo podemos ayudar en algo mas.
+Si el producto existe, responde "PRODUCTO_EXISTE".
+
+Ejemplos:
+Usuario: "Tienen lechuga?"
+Respuesta: "No vendemos vegetales ni lechuga."
+
+Usuario: "Quiero maicena"
+Respuesta: "PRODUCTO_EXISTE"
+
+Usuario: "${query}"
+Respuesta:
+`;
+
+  const llmResponse = await session.prompt(llmPrompt);
+
+  // --- 2️⃣ Si el LLM dice que no existe, devolvemos mensaje ---
+  if (!llmResponse.includes("PRODUCTO_EXISTE")) {
+    return llmResponse;
+  }
+
+
+
 
   let queryVector;
 
@@ -45,7 +71,7 @@ export async function recommendProducts(query, hnsw, products, session) {
   rescored.sort((a, b) => b.score - a.score);
 
   // Filtro: solo productos con score > 0.70
-  let recommended = rescored.filter(r => r.score >= 0.45);
+  let recommended = rescored.filter(r => r.score >= 0.75);
 
   console.log("Productos filtrados por Score: ", recommended)
 
