@@ -11,121 +11,68 @@ export async function recommendProducts(query, hnsw, products, session) {
 
   // --- Normalizar query ---
   query = normalizeText(query)
-  console.log("Query normalizada: ", query)
 
-  const llmPrompt = `
-Eres un asistente de una tienda que solo vende productos de estas categorías: AGRÍCOLA, ALUMINIO, ASEO Y LIMPIEZA, BATERIAS, BOLSAS, COTILLÓN, ECOLÓGICO, ELECTRODOMÉSTICOS, ELEMENTOS DE PROTECCIÓN, EMBALAJES Y ETIQUETAS, ENVASES, EQUIPAMIENTO GASTRONÓMICO, ESPUMADO, FLORERÍA, FRASCOS Y BOTELLAS, KRAFT, LIBRERÍA
-MAQUINARIA INDUSTRIAL, MOLDES, PLÁSTICO, REPOSTERÍA, TISSUE, VASOS / CUBIERTOS, PAPELERIA.
-Si el usuario pregunta por algo que no tenemos, responde claramente y amablemente que no lo vendemos, y luego preguntar si lo podemos ayudar en algo mas.
-Si el producto existe, responde "PRODUCTO_EXISTE".
-
-Ejemplos:
-Usuario: "Tienen lechuga?"
-Respuesta: "No vendemos vegetales ni lechuga."
-
-Usuario: "Quiero maicena"
-Respuesta: "PRODUCTO_EXISTE"
-
-Usuario: "${query}"
-Respuesta:
-`;
-
-  const llmResponse = await session.prompt(llmPrompt);
-
-  // --- 2️⃣ Si el LLM dice que no existe, devolvemos mensaje ---
-  if (!llmResponse.includes("PRODUCTO_EXISTE")) {
-    return llmResponse;
-  }
-
-
-
-
+// --- Detectar si la query es ambigua ---
   let queryVector;
 
-  // --- Detectar si la query es ambigua ---
   if (isAmbiguousQuery(query)) {
-    console.log("⚠️ Query ambigua detectada, usando categoría previa");
-    queryVector = session.lastCategoryVector;
+    // Query ambigua, detectar si ya se ha hablado de un producto anterior
+    if(session.lastCategoryVector){ 
+      queryVector = session.lastCategoryVector;
+    }else{ //Se ha detectado query ambigua sin previo contexto
+      return 'Hola, necesito mas detalles de que producto estas buscando porfavor.'
+    }  
   } else {
     queryVector = await getEmbedding(query);
     session.lastCategoryVector = queryVector;
   }
 
 
+   // --- Calcular similitud coseno con todos los productos ---
+  const scoredProducts = products.map(p => ({
+    ...p,
+    score: cosineSimilarity(queryVector, p.embedding)
+  }));
+
+  // --- Filtrar por un umbral mínimo de similitud ---
+  const threshold = 0.70; // ajustable según necesidad
+  let recommendedByScore = scoredProducts
+    .filter(p => p.score >= threshold)
+    .sort((a, b) => b.score - a.score);
+
+
   // --- Buscar k productos más cercanos --- 
   const k = 15; // cantidad de productos que devuelve el vector
   const result = hnsw.searchKnn(Array.from(queryVector), k);
 
-  // Calcular score de similitud coseno para cada resultado
-  const rescored = result.neighbors.map(id => {
-    const product = products.find(p => p.id === id);
-    const productVector = hnsw.getPoint(id); // Recupera el vector del índice
+  const recommendedByHNSW = result.neighbors.map(id => products.find(p => p.id === id));
 
-    return {
-      ...product,
-      score: cosineSimilarity(queryVector, productVector)
-    };
-  });
-
-  // Ordenar por score descendente
-  rescored.sort((a, b) => b.score - a.score);
-
-  // Filtro: solo productos con score > 0.70
-  let recommended = rescored.filter(r => r.score >= 0.75);
-
-  console.log("Productos filtrados por Score: ", recommended)
+// --- Combinar y evitar duplicados ---
+let recommended = [
+  ...recommendedByScore,
+  ...recommendedByHNSW.filter(p => !recommendedByScore.some(r => r.id === p.id))
+];
 
 
-  //let recommended = result.neighbors.map(id => products.find(p => p.id === id));
-  //console.log("Productos recomendados: ", recommended)
-
-  // 3. Extraer filtros desde el query
-  const volumeFilters = extractVolumeFilters(query);
-  const categoryFilters = extractCategoryFilters(query);
-  const filters = { ...volumeFilters, ...categoryFilters };
-
-
-  // 4. Aplicar filtros
-  if (filters.exact_volume_ml) {
-    // Primero intentamos encontrar coincidencias exactas
-    const exactMatches = recommended.filter(
-      p => p.capacity_ml && p.capacity_ml === filters.exact_volume_ml
-    );
-    if (exactMatches.length > 0) {
-      recommended = exactMatches;
-    }
-  }
-
-  if (filters.min_volume_ml) {
-    recommended = recommended.filter(
-      p => p.capacity_ml && p.capacity_ml >= filters.min_volume_ml
-    );
-  }
-
-  if (filters.max_volume_ml) {
-    recommended = recommended.filter(
-      p => p.capacity_ml && p.capacity_ml <= filters.max_volume_ml
-    );
-  }
-
-  /*if (filters.category) {
-    recommended = recommended.filter(
-      p => p.category && p.category.toLowerCase().includes(filters.category.toLowerCase())
-    );
-  }*/
-
-
-  // 5. Si después de filtrar no queda nada → devolvemos el más parecido semánticamente
+ // --- Si no hay coincidencias, usar LLM para respuesta amable ---
   if (recommended.length === 0) {
-    recommended = [products.find(p => p.id === result.neighbors[0])];
-  }
+    const llmPrompt = `
+Eres un asistente de tienda. Solo vendemos productos en estas categorías:
+AGRÍCOLA, ALUMINIO, ASEO Y LIMPIEZA, BATERIAS, BOLSAS, COTILLÓN, ECOLÓGICO, ELECTRODOMÉSTICOS, ELEMENTOS DE PROTECCIÓN, EMBALAJES Y ETIQUETAS, ENVASES, EQUIPAMIENTO GASTRONÓMICO, ESPUMADO, FLORERÍA, FRASCOS Y BOTELLAS, KRAFT, LIBRERÍA, MAQUINARIA INDUSTRIAL, MOLDES, PLÁSTICO, REPOSTERÍA, TISSUE, VASOS / CUBIERTOS, PAPELERIA, ARTE Y MANUALIDADES.
+Si el usuario pregunta por un producto que no tenemos, responde claramente y amablemente que no lo vendemos, y luego pregunta si puede ayudar en algo más.
 
-  //console.log("Productos despues de los filtros: ", recommended)
+Usuario: "${query}"
+Respuesta:
+    `;
+    const llmResponse = await session.prompt(llmPrompt);
+    return llmResponse;
+  }
+ 
 
   //  Solo top-10 productos para no sobrecargar el prompt
   recommended = recommended.slice(0, 10);
 
-
+  console.log("Productos Recomendados: ", recommended)
 
   // 3. Guardar en historial la consulta del usuario
   conversationHistory.push({ role: "user", content: query });
@@ -142,7 +89,7 @@ Saluda al usuario de manera amable y responde a su consulta.
 Mantén la conversación en español, clara y amigable.
 
 Productos recomendados: (Cada producto va separado por un punto y coma): 
-${recommended.map(p => "Nombre: " + p.name + " Descripcion: " + p.additional_information + " Categoria: " + p.category + " Precio: " + p.price).join("; ")}
+${recommended.map(p => "Nombre: " + p.name + " Descripcion: " + p.description + " Informacion Adicional: "+ p.additional_information +" Categoria: " + p.category + " Precio: " + p.price).join("; ")}
   `;
   } else {
     // Conversación en curso
@@ -156,7 +103,7 @@ Historial:
 ${conversationHistory.map(m => `${m.role}: ${m.content}`).join("\n")}
 
 Productos recomendados: (Cada producto va separado por un punto y coma): 
-${recommended.map(p => "Nombre: " + p.name + " Descripcion: " + p.additional_information + " Categoria: " + p.category + " Precio: " + p.price).join("; ")}
+${recommended.map(p => "Nombre: " + p.name + " Descripcion: " + p.description + " Informacion Adicional: " +p.additional_information + " Categoria: " + p.category + " Precio: " + p.price).join("; ")}
   `;
   }
 

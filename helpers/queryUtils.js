@@ -2,18 +2,25 @@ import { AMBIGUOUS_QUERIES } from '../config/constants.js'
 
 
 export function isAmbiguousQuery(query) {
-   const normalizedQuery = removeAccents(query.toLowerCase().trim());
+  if (!query) return false;
+
+  const normalizedQuery = removeAccents(query);
 
   return AMBIGUOUS_QUERIES.some(amb => {
-    // búsqueda más estricta: frase completa
-    const pattern = new RegExp(`\\b${amb}\\b`, "i"); 
+    const normalizedAmb = removeAccents(amb);
+    // usar \b (word boundary) para evitar que "mas" haga match dentro de "mascarilla"
+    const pattern = new RegExp(`\\b${normalizedAmb}\\b`, "i"); 
     return pattern.test(normalizedQuery);
   });
 }
 
 // funcion para normalizar queries sin acento
-function removeAccents(str) {
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+function removeAccents(str = "") {
+  return str
+    .normalize("NFD")              // descompone letras con tilde
+    .replace(/[\u0300-\u036f]/g, "") // quita marcas diacríticas
+    .toLowerCase()
+    .trim();
 }
 
 export function normalizeText(s) {

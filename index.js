@@ -10,7 +10,7 @@ const products = JSON.parse(raw);
 
 import readline from 'readline';
 
-import { initHnsw } from './models/initHnsw.js';
+import { initHnsw } from './models/initHNSW.js';
 import { recommendProducts } from './services/recommendProduct.js'
 import { initModel } from './models/gemma.js';
 
