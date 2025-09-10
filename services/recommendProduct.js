@@ -12,49 +12,49 @@ export async function recommendProducts(query, hnsw, products, session) {
   // --- Normalizar query ---
   query = normalizeText(query)
 
-// --- Detectar si la query es ambigua ---
+  // --- Detectar si la query es ambigua ---
   let queryVector;
 
   if (isAmbiguousQuery(query)) {
     // Query ambigua, detectar si ya se ha hablado de un producto anterior
-    if(session.lastCategoryVector){ 
+    if (session.lastCategoryVector) {
       queryVector = session.lastCategoryVector;
-    }else{ //Se ha detectado query ambigua sin previo contexto
+    } else { //Se ha detectado query ambigua sin previo contexto
       return 'Hola, necesito mas detalles de que producto estas buscando porfavor.'
-    }  
+    }
   } else {
     queryVector = await getEmbedding(query);
     session.lastCategoryVector = queryVector;
   }
 
 
-   // --- Calcular similitud coseno con todos los productos ---
+  // --- Calcular similitud coseno con todos los productos ---
   const scoredProducts = products.map(p => ({
     ...p,
     score: cosineSimilarity(queryVector, p.embedding)
   }));
 
   // --- Filtrar por un umbral mínimo de similitud ---
-  const threshold = 0.70; // ajustable según necesidad
+  const threshold = 0.75; // ajustable según necesidad
   let recommendedByScore = scoredProducts
     .filter(p => p.score >= threshold)
     .sort((a, b) => b.score - a.score);
 
 
   // --- Buscar k productos más cercanos --- 
-  const k = 15; // cantidad de productos que devuelve el vector
+  const k = 10; // cantidad de productos que devuelve el vector
   const result = hnsw.searchKnn(Array.from(queryVector), k);
 
   const recommendedByHNSW = result.neighbors.map(id => products.find(p => p.id === id));
 
-// --- Combinar y evitar duplicados ---
-let recommended = [
-  ...recommendedByScore,
-  ...recommendedByHNSW.filter(p => !recommendedByScore.some(r => r.id === p.id))
-];
+  // --- Combinar y evitar duplicados ---
+  let recommended = [
+    ...recommendedByScore,
+    ...recommendedByHNSW.filter(p => !recommendedByScore.some(r => r.id === p.id))
+  ];
 
 
- // --- Si no hay coincidencias, usar LLM para respuesta amable ---
+  // --- Si no hay coincidencias, usar LLM para respuesta amable ---
   if (recommended.length === 0) {
     const llmPrompt = `
 Eres un asistente de tienda. Solo vendemos productos en estas categorías:
@@ -67,17 +67,15 @@ Respuesta:
     const llmResponse = await session.prompt(llmPrompt);
     return llmResponse;
   }
- 
+
 
   //  Solo top-10 productos para no sobrecargar el prompt
   recommended = recommended.slice(0, 10);
 
-  console.log("Productos Recomendados: ", recommended)
-
-  // 3. Guardar en historial la consulta del usuario
+  // Guardar en historial la consulta del usuario
   conversationHistory.push({ role: "user", content: query });
 
-  // 4. Armar prompt con TODO el historial
+  // Armar prompt con TODO el historial
   let prompt;
 
   if (conversationHistory.length <= 1) {
@@ -88,8 +86,19 @@ Pregunta del cliente: "${query}"
 Saluda al usuario de manera amable y responde a su consulta.
 Mantén la conversación en español, clara y amigable.
 
+Reglas estrictas:
+- Solo puedes recomendar productos que estén directamente relacionados con la consulta del cliente.
+- No hagas preguntas adicionales sobre especificaciones, precios u otros temas.
+- Cierra siempre la respuesta con una frase amable que invite al cliente a seguir consultando. 
+  Ejemplos de frases de cierre (elige una o genera una variante similar):
+  - "¿Necesita algo más en lo que pueda ayudar?"
+  - "¿Hay algo más en lo que le pueda apoyar hoy?"
+  - "¿Quiere que le muestre otras opciones relacionadas?"
+  - "¿Le puedo ayudar con algo más?"
+
+
 Productos recomendados: (Cada producto va separado por un punto y coma): 
-${recommended.map(p => "Nombre: " + p.name + " Descripcion: " + p.description + " Informacion Adicional: "+ p.additional_information +" Categoria: " + p.category + " Precio: " + p.price).join("; ")}
+${recommended.map(p => "Nombre: " + p.name + " Descripcion: " + p.description + " Informacion Adicional: " + p.additional_information + " Categoria: " + p.category + " Precio: " + p.price).join("; ")}
   `;
   } else {
     // Conversación en curso
@@ -97,13 +106,24 @@ ${recommended.map(p => "Nombre: " + p.name + " Descripcion: " + p.description + 
 Eres un asistente que recomienda productos. No es necesario que saludes, ya que tienes una conversacion iniciada con el cliente.
 Pregunta del cliente: "${query}" 
 Mantén una conversación en español de manera amigable y útil.
+
+Reglas estrictas:
+- Solo puedes recomendar productos que estén directamente relacionados con la consulta del cliente.
+- No hagas preguntas adicionales sobre especificaciones, precios u otros temas.
+- Cierra siempre la respuesta con una frase amable que invite al cliente a seguir consultando. 
+  Ejemplos de frases de cierre (elige una o genera una variante similar):
+  - "¿Necesita algo más en lo que pueda ayudar?"
+  - "¿Hay algo más en lo que le pueda apoyar hoy?"
+  - "¿Quiere que le muestre otras opciones relacionadas?"
+  - "¿Le puedo ayudar con algo más?"
+
 Toma en cuenta el historial para dar respuestas consistentes.
 
 Historial:
 ${conversationHistory.map(m => `${m.role}: ${m.content}`).join("\n")}
 
 Productos recomendados: (Cada producto va separado por un punto y coma): 
-${recommended.map(p => "Nombre: " + p.name + " Descripcion: " + p.description + " Informacion Adicional: " +p.additional_information + " Categoria: " + p.category + " Precio: " + p.price).join("; ")}
+${recommended.map(p => "Nombre: " + p.name + " Descripcion: " + p.description + " Informacion Adicional: " + p.additional_information + " Categoria: " + p.category + " Precio: " + p.price).join("; ")}
   `;
   }
 
@@ -116,7 +136,8 @@ ${recommended.map(p => "Nombre: " + p.name + " Descripcion: " + p.description + 
 
     // Mantienes solo últimos 5 mensajes + el resumen
     const recentMessages = conversationHistory.slice(-5);
-    conversationHistory = [summaryMessage, ...recentMessages];
+    // Vaciar el array y meter el nuevo contenido
+    conversationHistory.splice(0, conversationHistory.length, summaryMessage, ...recentMessages);
   }
 
   console.log("Prompt:", prompt);
