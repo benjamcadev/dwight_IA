@@ -20,21 +20,21 @@ import { initModel } from './models/gemma.js';
 
 
 // Crear interfaz de lectura de consola
-const rl = readline.createInterface({
+/*const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
-});
+});*/
 
 
 // 1. Indexar a vectores los productos desde la bd
-const hnsw = await initHnsw(products)
+//const hnsw = await initHnsw(products)
 
 
 // 2. Cargar modelo Gemma
-const session = await initModel()
+//const session = await initModel()
 
 // Función para preguntar de manera recursiva
-const askQuery = () => {
+/*const askQuery = () => {
   rl.question('Escribe tu consulta: ', async (query) => {
     if (query.toLowerCase() === 'salir') {
       console.log('Saliendo...');
@@ -59,6 +59,6 @@ const askQuery = () => {
 
 // Iniciar ciclo de preguntas
 askQuery();
-
+*/
 
 
