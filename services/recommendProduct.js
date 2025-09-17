@@ -3,6 +3,7 @@ import { extractVolumeFilters, extractCategoryFilters } from '../helpers/filters
 import { conversationHistory, MAX_MESSAGES } from '../config/constants.js'
 import { summarizeHistory } from '../helpers/historyMessages.js'
 import { isAmbiguousQuery, normalizeText } from '../helpers/queryUtils.js';
+import { firstRecommendProductPrompt, noProductFindPrompt, recommendProductPrompt } from '../prompts/prompts.js';
 
 
 //Función de recomendación
@@ -35,7 +36,7 @@ export async function recommendProducts(query, hnsw, products, session) {
   }));
 
   // --- Filtrar por un umbral mínimo de similitud ---
-  const threshold = 0.75; // ajustable según necesidad
+  const threshold = 0.80; // ajustable según necesidad
   let recommendedByScore = scoredProducts
     .filter(p => p.score >= threshold)
     .sort((a, b) => b.score - a.score);
@@ -56,14 +57,7 @@ export async function recommendProducts(query, hnsw, products, session) {
 
   // --- Si no hay coincidencias, usar LLM para respuesta amable ---
   if (recommended.length === 0) {
-    const llmPrompt = `
-Eres un asistente de tienda. Solo vendemos productos en estas categorías:
-AGRÍCOLA, ALUMINIO, ASEO Y LIMPIEZA, BATERIAS, BOLSAS, COTILLÓN, ECOLÓGICO, ELECTRODOMÉSTICOS, ELEMENTOS DE PROTECCIÓN, EMBALAJES Y ETIQUETAS, ENVASES, EQUIPAMIENTO GASTRONÓMICO, ESPUMADO, FLORERÍA, FRASCOS Y BOTELLAS, KRAFT, LIBRERÍA, MAQUINARIA INDUSTRIAL, MOLDES, PLÁSTICO, REPOSTERÍA, TISSUE, VASOS / CUBIERTOS, PAPELERIA, ARTE Y MANUALIDADES.
-Si el usuario pregunta por un producto que no tenemos, responde claramente y amablemente que no lo vendemos, y luego pregunta si puede ayudar en algo más.
-
-Usuario: "${query}"
-Respuesta:
-    `;
+    const llmPrompt = await noProductFindPrompt(query);
     const llmResponse = await session.prompt(llmPrompt);
     return llmResponse;
   }
@@ -80,51 +74,21 @@ Respuesta:
 
   if (conversationHistory.length <= 1) {
     // Primera interacción
-    prompt = `
-Eres un asistente que recomienda productos.
-Pregunta del cliente: "${query}" 
-Saluda al usuario de manera amable y responde a su consulta.
-Mantén la conversación en español, clara y amigable.
-
-Reglas estrictas:
-- Solo puedes recomendar productos que estén directamente relacionados con la consulta del cliente.
-- No hagas preguntas adicionales sobre especificaciones, precios u otros temas.
-- Cierra siempre la respuesta con una frase amable que invite al cliente a seguir consultando. 
-  Ejemplos de frases de cierre (elige una o genera una variante similar):
-  - "¿Necesita algo más en lo que pueda ayudar?"
-  - "¿Hay algo más en lo que le pueda apoyar hoy?"
-  - "¿Quiere que le muestre otras opciones relacionadas?"
-  - "¿Le puedo ayudar con algo más?"
-
-
-Productos recomendados: (Cada producto va separado por un punto y coma): 
-${recommended.map(p => "Nombre: " + p.name + " Descripcion: " + p.description + " Informacion Adicional: " + p.additional_information + " Categoria: " + p.category + " Precio: " + p.price).join("; ")}
-  `;
+    try {
+      prompt = await firstRecommendProductPrompt(query, recommended);
+    } catch (error) {
+      console.log("Hubo error al firstRecommendProduct: ", error)
+    }
+    
   } else {
     // Conversación en curso
-    prompt = `
-Eres un asistente que recomienda productos. No es necesario que saludes, ya que tienes una conversacion iniciada con el cliente.
-Pregunta del cliente: "${query}" 
-Mantén una conversación en español de manera amigable y útil.
+    try {
+       prompt = await recommendProductPrompt(query, recommended, conversationHistory);
+    } catch (error) {
+      console.log("Hubo error al recommendProdcuts: ", error)
+    }
+   
 
-Reglas estrictas:
-- Solo puedes recomendar productos que estén directamente relacionados con la consulta del cliente.
-- No hagas preguntas adicionales sobre especificaciones, precios u otros temas.
-- Cierra siempre la respuesta con una frase amable que invite al cliente a seguir consultando. 
-  Ejemplos de frases de cierre (elige una o genera una variante similar):
-  - "¿Necesita algo más en lo que pueda ayudar?"
-  - "¿Hay algo más en lo que le pueda apoyar hoy?"
-  - "¿Quiere que le muestre otras opciones relacionadas?"
-  - "¿Le puedo ayudar con algo más?"
-
-Toma en cuenta el historial para dar respuestas consistentes.
-
-Historial:
-${conversationHistory.map(m => `${m.role}: ${m.content}`).join("\n")}
-
-Productos recomendados: (Cada producto va separado por un punto y coma): 
-${recommended.map(p => "Nombre: " + p.name + " Descripcion: " + p.description + " Informacion Adicional: " + p.additional_information + " Categoria: " + p.category + " Precio: " + p.price).join("; ")}
-  `;
   }
 
 
@@ -138,6 +102,8 @@ ${recommended.map(p => "Nombre: " + p.name + " Descripcion: " + p.description + 
     const recentMessages = conversationHistory.slice(-5);
     // Vaciar el array y meter el nuevo contenido
     conversationHistory.splice(0, conversationHistory.length, summaryMessage, ...recentMessages);
+
+    
   }
 
   console.log("Prompt:", prompt);
