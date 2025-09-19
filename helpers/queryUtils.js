@@ -33,3 +33,19 @@ export function normalizeText(s) {
     .replace(/\s+/g, " ")
     .trim();
 }
+
+export function extractJSON(text) {
+  try {
+    // Captura lo que esté entre ```json ... ```
+    const match = text.match(/```json([\s\S]*?)```/);
+    if (match) {
+      return JSON.parse(match[1].trim());
+    }
+
+    // Si no tiene markdown, intenta parsear directo
+    return JSON.parse(text);
+  } catch (err) {
+    console.error("❌ Error al parsear JSON:", err);
+    return null;
+  }
+}

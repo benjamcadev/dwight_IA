@@ -34,10 +34,10 @@ app.post("/chat", async (req, res) => {
        return res.status(422).json({ error: "El campo 'query' no puede estar vacío"})
     }
 
-    // Aquí llamas a tu función del chatbot
     const response = await recommendProducts(query, hnsw, products, session);
 
-    return res.json({ answer: response });
+  
+    return res.json({ response });
   } catch (error) {
     console.error("Error en /chat:", error);
     res.status(500).json({ error: "Error interno en el chatbot" });

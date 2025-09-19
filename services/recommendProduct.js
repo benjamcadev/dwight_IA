@@ -1,8 +1,7 @@
 import { getEmbedding } from '../helpers/embeddings.js'
-import { extractVolumeFilters, extractCategoryFilters } from '../helpers/filters.js';
 import { conversationHistory, MAX_MESSAGES } from '../config/constants.js'
 import { summarizeHistory } from '../helpers/historyMessages.js'
-import { isAmbiguousQuery, normalizeText } from '../helpers/queryUtils.js';
+import { isAmbiguousQuery, normalizeText, extractJSON } from '../helpers/queryUtils.js';
 import { firstRecommendProductPrompt, noProductFindPrompt, recommendProductPrompt } from '../prompts/prompts.js';
 
 
@@ -66,6 +65,8 @@ export async function recommendProducts(query, hnsw, products, session) {
   //  Solo top-10 productos para no sobrecargar el prompt
   recommended = recommended.slice(0, 10);
 
+  //console.log("Productos recomendados: ", recommended)
+
   // Guardar en historial la consulta del usuario
   conversationHistory.push({ role: "user", content: query });
 
@@ -106,17 +107,28 @@ export async function recommendProducts(query, hnsw, products, session) {
     
   }
 
-  console.log("Prompt:", prompt);
+  //console.log("Prompt:", prompt);
 
-  const answer = await session.prompt(prompt, {
+  const raw = await session.prompt(prompt, {
     nBatch: 8 // default es 8 o 16
   });
 
+  const data = extractJSON(raw);
+
+  console.log("RESPUESTA DEL LLM:  ", raw)
+
+  const objectResponse = {
+    answer: data.answer,
+    products: data.products ? data.products : [],
+    closing: data.closing ? data.closing : ''
+  }
+
+  console.log("RESPUESTA EN OBJECT : ", objectResponse)
 
   // 6. Guardar respuesta en historial
-  conversationHistory.push({ role: "assistant", content: answer });
+  conversationHistory.push({ role: "assistant", content: objectResponse.answer + " Productos: " +objectResponse.products.map(p => p.name).join(";") });
 
-  return answer;
+  return objectResponse;
 
   //return recommended; // si quieres solo probar
 }
