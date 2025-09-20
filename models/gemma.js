@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename);
 
 export async function initModel() {
 
-    console.log("Cargando LLM llama-node con modelo google_gemma-3-4b-it-q4_k_m")
+    console.log("Cargando LLM llama-node con modelo gemma-2-2b-it.q4_k_m")
 
     const numCpus = os.cpus().length; // Obtener cantidad de nucleos del proce
 

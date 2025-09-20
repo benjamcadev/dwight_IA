@@ -10,20 +10,24 @@ export async function initHnsw(products){
 
 console.log("Cargando HNSW, indexando productos.")
 
-const dim = 1024;
+const sampleVector = await getEmbedding("texto de prueba"); // Sacamos un ejemplo para saber cuantos vectores corresponde 768, 1024, etc...
+
+const dim = sampleVector.length;
 const space = "cosine";
 const hnsw = new HierarchicalNSW(space, dim);
 
 hnsw.initIndex(products.length);
 
 // Agregar productos al índice con HNSW
-for (const product of products) {
-  //const vector = await getEmbedding(product.description);
-  const textProduct = `${product.name}.  ${product.description || ""} . ${product.additional_information || ""}. Categoría: ${product.category || ""}. Tags: ${product.tag || ""}`;
+const vectors = await Promise.all(products.map(async (product) => {
+  const textProduct = `${product.name}. ${product.description || ""}. ${product.additional_information || ""}. Categoría: ${product.category || ""}. Tags: ${product.tag || ""}`;
   const vector = await getEmbedding(textProduct);
-  // Guardar embedding en el producto
-  product.embedding = vector;
-  hnsw.addPoint(Array.from(vector), product.id);
+  product.embedding = vector; // Guardar embedding en el producto
+  return { id: product.id, vector };
+}));
+
+for (const { id, vector } of vectors) {
+  hnsw.addPoint(Array.from(vector), id);  // agregar vectores al HNSW
 }
 
 return hnsw
