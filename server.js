@@ -5,7 +5,7 @@ import cors from "cors";
 
 //BD de prueba json
 import fs from 'fs';
-const raw = fs.readFileSync('./db/products_agro_prueba.json', 'utf-8');
+const raw = fs.readFileSync('./db/products_agro.json', 'utf-8');
 const products = JSON.parse(raw);
 
 import { initHnsw } from './models/initHNSW.js';
