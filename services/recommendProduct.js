@@ -2,7 +2,7 @@ import { getEmbedding } from '../helpers/embeddings.js'
 import { conversationHistory, MAX_MESSAGES } from '../config/constants.js'
 import { summarizeHistory } from '../helpers/historyMessages.js'
 import { isAmbiguousQuery, normalizeText, extractJSON } from '../helpers/queryUtils.js';
-import { firstRecommendProductPrompt, noProductFindPrompt, recommendProductPrompt } from '../prompts/prompts.js';
+import { noProductFindPrompt, recommendProductPrompt } from '../prompts/prompts.js';
 
 
 //Función de recomendación
@@ -27,45 +27,59 @@ export async function recommendProducts(query, hnsw, products, session) {
     session.lastCategoryVector = queryVector;
   }
 
-
   // --- Calcular similitud coseno con todos los productos ---
   const scoredProducts = products.map(p => ({
     ...p,
     score: cosineSimilarity(queryVector, p.embedding)
   }));
 
-  // --- Filtrar por un umbral mínimo de similitud ---
-  const threshold = 0.80; // ajustable según necesidad
-  let recommendedByScore = scoredProducts
-    .filter(p => p.score >= threshold)
-    .sort((a, b) => b.score - a.score);
-
 
   // --- Buscar k productos más cercanos --- 
   const k = 10; // cantidad de productos que devuelve el vector
   const result = hnsw.searchKnn(Array.from(queryVector), k);
 
-  const recommendedByHNSW = result.neighbors.map(id => products.find(p => p.id === id));
+  // Mapear vecinos y calcular similitud coseno
+  let recommendedByHNSW = result.neighbors
+    .map((id, i) => {
+      const p = products.find(prod => prod.id === id);
+      return { ...p, score: cosineSimilarity(queryVector, p.embedding) };
+    });
 
-  // --- Combinar y evitar duplicados ---
-  let recommended = [
+  // Filtrar por umbral mínimo
+  const threshold = 0.81;
+  recommendedByHNSW = recommendedByHNSW
+    .filter(p => p.score >= threshold)
+    .sort((a, b) => b.score - a.score);
+
+  // 4Opcional: si quieres también usar scoredProducts (todo el catálogo)
+  // Solo si tienes pocos productos o quieres máxima exhaustividad
+  const recommendedByScore = scoredProducts
+    .filter(p => p.score >= threshold)
+    .sort((a, b) => b.score - a.score);
+
+  // Combinar evitando duplicados
+  const recommended = [
     ...recommendedByScore,
     ...recommendedByHNSW.filter(p => !recommendedByScore.some(r => r.id === p.id))
-  ];
+  ].slice(0, 5); // limitar top-10 de prodcutos
+
+
+  console.log("Productos Recomendados: ", recommended)
 
 
   // --- Si no hay coincidencias, usar LLM para respuesta amable ---
   if (recommended.length === 0) {
     const llmPrompt = await noProductFindPrompt(query);
-    const llmResponse = await session.prompt(llmPrompt);
-    return llmResponse;
+    const objectResponse = await responsePrompt(session, llmPrompt, conversationHistory)
+
+    return objectResponse;
   }
 
 
   //  Solo top-10 productos para no sobrecargar el prompt
-  recommended = recommended.slice(0, 10);
+  //recommended = recommended.slice(0, 10);
 
-  //console.log("Productos recomendados: ", recommended)
+
 
   // Guardar en historial la consulta del usuario
   conversationHistory.push({ role: "user", content: query });
@@ -73,25 +87,13 @@ export async function recommendProducts(query, hnsw, products, session) {
   // Armar prompt con TODO el historial
   let prompt;
 
-  if (conversationHistory.length <= 1) {
-    // Primera interacción
-    try {
-      prompt = await firstRecommendProductPrompt(query, recommended);
-    } catch (error) {
-      console.log("Hubo error al firstRecommendProduct: ", error)
-    }
-    
-  } else {
-    // Conversación en curso
-    try {
-       prompt = await recommendProductPrompt(query, recommended, conversationHistory);
-    } catch (error) {
-      console.log("Hubo error al recommendProdcuts: ", error)
-    }
-   
+  try {
+    prompt = await recommendProductPrompt(query, recommended, conversationHistory);
 
+    console.log("\x1b[31mPrompt:  \x1b[0m", prompt)
+  } catch (error) {
+    console.log("Hubo error al recommendProdcuts: ", error)
   }
-
 
   // Valida la cantidad de interacciones entre user y chatbot
   if (conversationHistory.length >= MAX_MESSAGES) {
@@ -103,19 +105,28 @@ export async function recommendProducts(query, hnsw, products, session) {
     const recentMessages = conversationHistory.slice(-5);
     // Vaciar el array y meter el nuevo contenido
     conversationHistory.splice(0, conversationHistory.length, summaryMessage, ...recentMessages);
-
-    
   }
 
-  //console.log("Prompt:", prompt);
+  const objectResponse = await responsePrompt(session, prompt, conversationHistory)
+
+  return objectResponse;
+
+}
+
+async function responsePrompt(session, prompt, conversationHistory) {
 
   const raw = await session.prompt(prompt, {
-    nBatch: 8 // default es 8 o 16
+    temperature: 0.5,
+    top_p: 0.9,
+    repeat_penalty: 1.1
   });
 
-  const data = extractJSON(raw);
-
-  console.log("RESPUESTA DEL LLM:  ", raw)
+  let data;
+  try {
+    data = extractJSON(raw);
+  } catch {
+    data = { answer: raw, products: [], closing: "" };
+  }
 
   const objectResponse = {
     answer: data.answer,
@@ -125,12 +136,10 @@ export async function recommendProducts(query, hnsw, products, session) {
 
   console.log("RESPUESTA EN OBJECT : ", objectResponse)
 
-  // 6. Guardar respuesta en historial
-  conversationHistory.push({ role: "assistant", content: objectResponse.answer + " Productos: " +objectResponse.products.map(p => p.name).join(";") });
-
-  return objectResponse;
-
-  //return recommended; // si quieres solo probar
+  //  Guardar respuesta en historial
+  conversationHistory.push({ role: "assistant", content: objectResponse.answer + " Productos: " + objectResponse.products.map(p => p.name).join(";") });
+  
+  return objectResponse
 }
 
 

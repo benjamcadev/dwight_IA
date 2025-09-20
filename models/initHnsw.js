@@ -30,5 +30,7 @@ for (const { id, vector } of vectors) {
   hnsw.addPoint(Array.from(vector), id);  // agregar vectores al HNSW
 }
 
+hnsw.setEf(100); 
+
 return hnsw
 }

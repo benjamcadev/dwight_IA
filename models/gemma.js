@@ -22,7 +22,8 @@ export async function initModel() {
         modelPath: path.join(__dirname, 'gemma-2-2b-it.q4_k_m.gguf'),
         // Opciones de rendimiento:
         nThreads: numCpus,      
-        nBatch: 256, // tokens que procesa en paralelo 
+        nBatch: 512, // tokens que procesa en paralelo 
+        nCtx: 2048 // Para que tu chatbot recuerde más en la conversación
     });
     const context = await model.createContext();
     const session = new LlamaChatSession({ contextSequence: context.getSequence() });
