@@ -15,49 +15,55 @@ jobs:
 
       # 2️⃣ Configurar SSH
       - name: Setup SSH for deploy
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_PORT: ${{ secrets.VPS_PORT }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "$VPS_KEY" > ~/.ssh/id_ed25519
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -p "$VPS_PORT" -H "$VPS_HOST" >> ~/.ssh/known_hosts
-
-      # 3️⃣ Subir archivos al VPS con rsync
-      - name: Rsync files to VPS
+          ssh-keyscan -p "${{ secrets.VPS_PORT }}" -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_PORT: ${{ secrets.VPS_PORT }}
-          VPS_USER: ${{ secrets.VPS_USER }}
+
+      # 3️⃣ Sincronizar archivos con rsync
+      - name: Rsync files to VPS
         run: |
           rsync -avz --delete --exclude=".git" --exclude="node_modules" \
-            -e "ssh -i ~/.ssh/id_ed25519 -p $VPS_PORT" \
-            ./ $VPS_USER@$VPS_HOST:/home/$VPS_USER/app/dwight_IA/
-
-      # 4️⃣ Instalar dependencias y reiniciar app en el VPS
-      - name: Install deps & restart on VPS
+          -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_PORT }}" \
+          ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app/dwight_IA/
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_PORT: ${{ secrets.VPS_PORT }}
           VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+
+      # 4️⃣ Instalar dependencias y reiniciar app
+      - name: Install deps & restart on VPS
         run: |
-          ssh -i ~/.ssh/id_ed25519 -p $VPS_PORT $VPS_USER@$VPS_HOST << 'EOF'
+          ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             set -e
-            cd /home/$USER/app/dwight_IA || exit 1
+
+            # Cargar NVM
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+            # Ir al directorio de la app
+            cd /home/${USER}/app/dwight_IA || exit 1
 
             # Instalar dependencias
             npm install --production
 
-            # Si necesitas build (Next.js)
+            # Descomenta si necesitas build para Next.js
             # npm run build
 
-            # Reiniciar app con PM2
+            # Reiniciar o iniciar app con PM2
             if pm2 describe dwightIA > /dev/null; then
               pm2 reload dwightIA
             else
               pm2 start npm --name "dwightIA" -- start
             fi
+
+            exit
           EOF
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
