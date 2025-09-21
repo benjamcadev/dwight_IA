@@ -75,12 +75,6 @@ export async function recommendProducts(query, hnsw, products, session) {
     return objectResponse;
   }
 
-
-  //  Solo top-10 productos para no sobrecargar el prompt
-  //recommended = recommended.slice(0, 10);
-
-
-
   // Guardar en historial la consulta del usuario
   conversationHistory.push({ role: "user", content: query });
 
