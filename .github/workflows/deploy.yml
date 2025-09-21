@@ -9,22 +9,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Clonar el repositorio
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Configurar SSH para desplegar
       - name: Setup SSH for deploy
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
+          # add host to known_hosts to avoid interactivity
           ssh-keyscan -p "${{ secrets.VPS_PORT }}" -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_PORT: ${{ secrets.VPS_PORT }}
 
-      # 3️⃣ Sincronizar archivos al VPS
       - name: Rsync files to VPS
         run: |
           rsync -avz --delete --exclude=".git" --exclude="node_modules" -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_PORT }}" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app/dwight_IA/
@@ -33,38 +31,25 @@ jobs:
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_PORT: ${{ secrets.VPS_PORT }}
 
-      # 4️⃣ Instalar dependencias y reiniciar app con PM2
       - name: Install deps & restart on VPS
         run: |
-          ssh -i ~/.ssh/id_ed25519 -p $VPS_PORT $VPS_USER@$VPS_HOST << 'EOF'
-            #!/usr/bin/env bash
+          ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             set -e
+            cd /home/${USER}/app/dwight_IA || exit 1
 
-            APP_DIR="/home/ubuntu/app/dwight_IA"
-            cd $APP_DIR || exit 1
-
-            # Cargar NVM
+            # Si usas nvm, carga nvm aquí
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-            # Usar Node 22
-            nvm use 22 || nvm install 22
-
-            # Instalar dependencias sin fallar por warnings
+            # Instalar dependencias sin romper el flujo si hay warnings
             npm install --production || true
 
-            # Construir Next.js si es necesario
-            # npm run build || true
-
-            # Reiniciar o iniciar la app con PM2
+            # Reiniciar app con PM2
             if pm2 describe dwightIA > /dev/null; then
-              pm2 reload dwightIA
+              pm2 reload dwightIA || pm2 start npm --name "dwightIA" -- start || true
             else
-              pm2 start npm --name "dwightIA" -- start
+              pm2 start npm --name "dwightIA" -- start || true
             fi
-
-            # Mostrar estado de la app
-            pm2 status dwightIA
 
             exit 0
           EOF
