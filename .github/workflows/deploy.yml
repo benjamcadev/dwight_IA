@@ -17,22 +17,22 @@ jobs:
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           # add host to known_hosts to avoid interactivity
-          ssh-keyscan -p "${{ secrets.VPS_SSH_PORT }}" -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -p "${{ secrets.VPS_PORT }}" -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_SSH_PORT: ${{ secrets.VPS_SSH_PORT }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
 
       - name: Rsync files to VPS
         run: |
-          rsync -avz --delete --exclude=".git" --exclude="node_modules" -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_SSH_PORT }}" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app/dwight_IA/
+          rsync -avz --delete --exclude=".git" --exclude="node_modules" -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_PORT }}" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app/dwight_IA/
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_SSH_PORT: ${{ secrets.VPS_SSH_PORT }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
 
       - name: Install deps & restart on VPS
         run: |
-          ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_SSH_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             set -e
             cd /home/${USER}/app/dwight_IA || exit 1
             # Si usas nvm, carga nvm aquí (opcional)
@@ -52,4 +52,4 @@ jobs:
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_SSH_PORT: ${{ secrets.VPS_SSH_PORT }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
