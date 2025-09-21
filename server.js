@@ -46,6 +46,6 @@ app.post("/chat", async (req, res) => {
 
 // Iniciar servidor
 const PORT = 4000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0',() => {
   console.log(`API Chatbot corriendo en http://localhost:${PORT}`);
 });
