@@ -31,7 +31,7 @@ app.post("/chat", async (req, res) => {
     const { query } = req.body;
 
     if (!query) {
-       return res.status(422).json({ error: "El campo 'query' no puede estar vacío"})
+       return res.status(422).json({ error: "El campo 'query' no puede estar vacio"})
     }
 
     const response = await recommendProducts(query, hnsw, products, session);
