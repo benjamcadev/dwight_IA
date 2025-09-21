@@ -23,10 +23,10 @@ jobs:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_PORT: ${{ secrets.VPS_PORT }}
 
-      # 3. Subir archivos al VPS
+      # 3. Subir archivos al VPS (excluyendo .git, node_modules y el modelo .gguf)
       - name: Rsync files to VPS
         run: |
-          rsync -avz --delete --exclude=".git" --exclude="node_modules" -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_PORT }}" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app/dwight_IA/
+          rsync -avz --delete --exclude=".git" --exclude="node_modules" --exclude="models/*.gguf" -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_PORT }}" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app/dwight_IA/
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
