@@ -12,43 +12,42 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup SSH for deploy
+      - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
+          # Añadir VPS al known_hosts
           ssh-keyscan -p "${{ secrets.VPS_PORT }}" -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
         env:
+          VPS_KEY: ${{ secrets.VPS_KEY }}
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_PORT: ${{ secrets.VPS_PORT }}
-          VPS_KEY: ${{ secrets.VPS_KEY }}
 
       - name: Rsync files to VPS (exclude .gguf)
         run: |
-          rsync -avz --delete --exclude=".git" --exclude="node_modules" --exclude="models/*.gguf" \
-          -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_PORT }}" ./ \
-          ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app/dwight_IA/
+          rsync -avz --delete \
+            --exclude=".git" \
+            --exclude="node_modules" \
+            --exclude="models/*.gguf" \
+            -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 -p $VPS_PORT" \
+            ./ $VPS_USER@$VPS_HOST:/home/$VPS_USER/app/dwight_IA/
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_PORT: ${{ secrets.VPS_PORT }}
 
-      - name: Install deps & restart on VPS
+      - name: Install dependencies & restart app
         run: |
-          ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-            set +e
+          ssh -i ~/.ssh/id_ed25519 -p $VPS_PORT $VPS_USER@$VPS_HOST << 'EOF'
+            set -e
             cd /home/${USER}/app/dwight_IA || exit 1
 
-            # Cargar nvm para Node
+            # Cargar NVM y Node
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-            # Verificar que el modelo .gguf exista
-            if [ ! -f "models/gemma-2-2b-it.q4_k_m.gguf" ]; then
-              echo "⚠️ Modelo LLM no encontrado en models/, por favor subirlo manualmente"
-            fi
-
-            # Instalar dependencias sin romper el flujo
+            # Instalar dependencias sin romper el flujo si hay warnings
             npm install --production || true
 
             # Reiniciar app con PM2
@@ -58,7 +57,7 @@ jobs:
               pm2 start npm --name "dwightIA" -- start || true
             fi
 
-            true
+            exit 0
           EOF
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
