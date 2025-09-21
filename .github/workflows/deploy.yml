@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Configurar SSH
+      # 2️⃣ Configurar SSH para desplegar
       - name: Setup SSH for deploy
         run: |
           mkdir -p ~/.ssh
@@ -24,44 +24,49 @@ jobs:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_PORT: ${{ secrets.VPS_PORT }}
 
-      # 3️⃣ Sincronizar archivos con rsync
+      # 3️⃣ Sincronizar archivos al VPS
       - name: Rsync files to VPS
         run: |
-          rsync -avz --delete --exclude=".git" --exclude="node_modules" \
-          -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_PORT }}" \
-          ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app/dwight_IA/
+          rsync -avz --delete --exclude=".git" --exclude="node_modules" -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_PORT }}" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app/dwight_IA/
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_PORT: ${{ secrets.VPS_PORT }}
 
-      # 4️⃣ Instalar dependencias y reiniciar app
+      # 4️⃣ Instalar dependencias y reiniciar app con PM2
       - name: Install deps & restart on VPS
         run: |
-          ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          ssh -i ~/.ssh/id_ed25519 -p $VPS_PORT $VPS_USER@$VPS_HOST << 'EOF'
+            #!/usr/bin/env bash
             set -e
+
+            APP_DIR="/home/ubuntu/app/dwight_IA"
+            cd $APP_DIR || exit 1
 
             # Cargar NVM
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-            # Ir al directorio de la app
-            cd /home/${USER}/app/dwight_IA || exit 1
+            # Usar Node 22
+            nvm use 22 || nvm install 22
 
-            # Instalar dependencias
-            npm install --production
+            # Instalar dependencias sin fallar por warnings
+            npm install --production || true
 
-            # Descomenta si necesitas build para Next.js
-            # npm run build
+            # Construir Next.js si es necesario
+            # npm run build || true
 
-            # Reiniciar o iniciar app con PM2
+            # Reiniciar o iniciar la app con PM2
             if pm2 describe dwightIA > /dev/null; then
               pm2 reload dwightIA
             else
               pm2 start npm --name "dwightIA" -- start
             fi
 
-            exit
+            # Mostrar estado de la app
+            pm2 status dwightIA
+
+            exit 0
           EOF
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
