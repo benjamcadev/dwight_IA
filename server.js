@@ -8,7 +8,7 @@ import fs from 'fs';
 const raw = fs.readFileSync('./db/products_agro.json', 'utf-8');
 const products = JSON.parse(raw);
 
-import { initHnsw } from './models/initHNSW.js';
+import { initHnsw } from './models/initHnsw.js';
 import { recommendProducts } from './services/recommendProduct.js'
 import { initModel } from './models/gemma.js';
 
