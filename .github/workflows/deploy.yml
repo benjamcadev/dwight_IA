@@ -7,13 +7,12 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      # 1. Clonar el repositorio
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Configurar SSH
-      - name: Setup SSH
+      - name: Setup SSH for deploy
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
@@ -23,31 +22,34 @@ jobs:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_PORT: ${{ secrets.VPS_PORT }}
 
-      # 3. Subir archivos al VPS
       - name: Rsync files to VPS
         run: |
-          rsync -avz --delete --exclude=".git" --exclude="node_modules" -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_PORT }}" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app/dwight_IA/
+          rsync -avz --delete \
+            --exclude=".git" \
+            --exclude="node_modules" \
+            --exclude="models/gemma-2-2b-it.q4_k_m.gguf" \
+            -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_PORT }}" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app/dwight_IA/
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_PORT: ${{ secrets.VPS_PORT }}
 
-      # 4. Instalar deps y reiniciar la app
-      - name: Install deps & restart app
+      - name: Install deps & restart on VPS
         run: |
           ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+            set -e
             cd /home/${USER}/app/dwight_IA || exit 1
 
-            # Cargar NVM
+            # Si usas nvm, carga nvm
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-            # Instalar dependencias
+            # Instalar dependencias (ignora warnings)
             npm install --production || true
 
-            # Reiniciar app con PM2 sin romper el workflow
+            # Reiniciar app con PM2
             if pm2 describe dwightIA > /dev/null; then
-              pm2 reload dwightIA --update-env || true
+              pm2 reload dwightIA || pm2 start npm --name "dwightIA" -- start || true
             else
               pm2 start npm --name "dwightIA" -- start || true
             fi
