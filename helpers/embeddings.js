@@ -1,7 +1,7 @@
 import { pipeline } from "@xenova/transformers";
 
-//const embedder = await pipeline("feature-extraction", "Xenova/multilingual-e5-large");  // MODELO MAS GRANDE
-const embedder = await pipeline("feature-extraction", "Xenova/multilingual-e5-small"); // MODELO MAS PEQUEÑO
+const embedder = await pipeline("feature-extraction", "Xenova/multilingual-e5-large");  // MODELO MAS GRANDE
+//const embedder = await pipeline("feature-extraction", "Xenova/multilingual-e5-small"); // MODELO MAS PEQUEÑO
 
 //const embedder = await pipeline("feature-extraction", "Xenova/sirius422-multilingual-e5-large-onnx");
 
