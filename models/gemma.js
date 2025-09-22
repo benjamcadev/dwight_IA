@@ -2,6 +2,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { getLlama, LlamaChatSession } from 'node-llama-cpp';
 import os from "os";
+import { promptRules } from '../prompts/prompts.js';
 
 
 // Configuracion de rutas
@@ -27,6 +28,7 @@ export async function initModel() {
     });
     const context = await model.createContext();
     const session = new LlamaChatSession({ contextSequence: context.getSequence() });
+    await session.prompt(promptRules())
 
     return session;
 

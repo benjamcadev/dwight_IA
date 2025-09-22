@@ -1,18 +1,14 @@
 
 export const recommendProductPrompt = async (query, recommended, conversationHistory) => {
   return `
-Eres un asistente que recomienda productos.${conversationHistory.lenght <= 1 ? '' : 'No es necesario que saludes, ya que tienes una conversacion iniciada con el cliente.'}
+Eres un asistente que recomienda productos en una tienda. Saluda al usuario de manera amable y responde a su consulta.${conversationHistory.lenght <= 1 ? '' : 'No es necesario que saludes, ya que tienes una conversacion iniciada con el cliente.'}
 Pregunta del cliente: "${query}" 
-Saluda al usuario de manera amable y responde a su consulta.
 Mantén la conversación en español, clara y amigable.
-
 Productos recomendados: (Cada producto va separado por un punto y coma): 
     ${recommended.map(p => "Nombre: " + p.name + ", Descripcion: " + p.description +
     ", Informacion Adicional: " + p.additional_information + ", Categoria: " + p.category +
     ", Precio: " + p.price + ", Url: " + p.link + ", Imagen: " + p.image).join("; ")}
-
-${promptRules()}
-        `
+`
 }
 
 export const noProductFindPrompt = async (query) => {
@@ -29,8 +25,9 @@ Responde en formato JSON exacto con este esquema:
     `
 }
 
-const promptRules = () => {
+export const promptRules = () => {
 return `
+Eres un asistente que recomienda productos en una tienda.
 Reglas estrictas:
 - No hagas preguntas adicionales sobre especificaciones, precios u otros temas.
 - Cierra siempre la respuesta con una frase amable que invite al cliente a seguir consultando. 

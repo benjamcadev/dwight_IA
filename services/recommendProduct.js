@@ -61,7 +61,7 @@ export async function recommendProducts(query, hnsw, products, session) {
   const recommended = [
     ...recommendedByScore,
     ...recommendedByHNSW.filter(p => !recommendedByScore.some(r => r.id === p.id))
-  ].slice(0, 5); // limitar top-10 de prodcutos
+  ].slice(0, 3); // limitar top-10 de prodcutos
 
 
   console.log("Productos Recomendados: ", recommended)
@@ -112,7 +112,7 @@ async function responsePrompt(session, prompt, conversationHistory) {
   const raw = await session.prompt(prompt, {
     temperature: 0.5,
     top_p: 0.9,
-    repeat_penalty: 1.1
+    repeat_penalty: 1.5
   });
 
   let data;
