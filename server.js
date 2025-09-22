@@ -20,7 +20,6 @@ const hnsw = await initHnsw(products)
 // 2. Cargar modelo Gemma
 const session = await initModel()
 
-
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());

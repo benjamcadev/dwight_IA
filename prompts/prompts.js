@@ -34,7 +34,7 @@ export const summarizeHistory = async (conversationHistory) => {
     .join("\n");
 
     const prompt = `
-  Resume la siguiente conversación entre un cliente y un asistente en máximo 8 oraciones.
+  Resume la siguiente conversación entre un cliente y un asistente en máximo de 5 lineas.
   El resumen debe mantener:
   - Intención principal del cliente
   - Productos mencionados

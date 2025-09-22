@@ -1,8 +1,8 @@
 import { getEmbedding } from '../helpers/embeddings.js'
 import { conversationHistory, MAX_MESSAGES } from '../config/constants.js'
 import { isAmbiguousQuery, normalizeText, extractJSON } from '../helpers/queryUtils.js';
-import { noProductFindPrompt, recommendProductPrompt } from '../prompts/prompts.js';
-
+import { noProductFindPrompt, recommendProductPrompt, summarizeHistory } from '../prompts/prompts.js';
+import { createSession } from '../models/gemma.js'
 
 //Función de recomendación
 // ------------------------
@@ -80,25 +80,28 @@ export async function recommendProducts(query, hnsw, products, session) {
 
   try {
     prompt = await recommendProductPrompt(query, recommended, conversationHistory);
-
-    console.log("\x1b[31mPrompt:  \x1b[0m", prompt)
   } catch (error) {
     console.log("Hubo error al recommendProdcuts: ", error)
   }
 
   // Valida la cantidad de interacciones entre user y chatbot
   if (conversationHistory.length >= MAX_MESSAGES) {
-    console.log("Historial muy largo, creando resumen...");
+    console.log("\x1b[31mHistorial muy largo, creando resumen...\x1b[0m")
 
-    const summaryPrompt = await summarizeHistory(conversationHistory, session);
+    const summaryPrompt = await summarizeHistory(conversationHistory);
 
     const summary = await session.prompt(summaryPrompt);
     const summaryMessage = {role: "system",content: `Resumen de la conversación: ${summary}`,};
 
-    // Mantienes solo últimos 5 mensajes + el resumen
-    const recentMessages = conversationHistory.slice(-5);
+    // Mantienes solo últimos 2 mensajes + el resumen
+    const recentMessages = conversationHistory.slice(-2);
     // Vaciar el array y meter el nuevo contenido
     conversationHistory.splice(0, conversationHistory.length, summaryMessage, ...recentMessages);
+
+    // reiniciar la sesion del modelo ya que puede olvidar
+    console.log("\x1b[31mReiniciando modelo LLM...\x1b[0m")
+    session = await createSession();
+
   }
 
   const objectResponse = await responsePrompt(session, prompt, conversationHistory)

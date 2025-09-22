@@ -9,6 +9,8 @@ import { promptRules } from '../prompts/prompts.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+let model, llama;
+const nameModel = 'gemma-2-2b-it.q4_k_m.gguf';
 
 
 export async function initModel() {
@@ -18,21 +20,28 @@ export async function initModel() {
     const numCpus = os.cpus().length; // Obtener cantidad de nucleos del proce
 
     // Configurar LLM local (llama-node)
-    const llama = await getLlama();
-    const model = await llama.loadModel({
-        modelPath: path.join(__dirname, 'gemma-2-2b-it.q4_k_m.gguf'),
+    llama = await getLlama();
+    model = await llama.loadModel({
+        modelPath: path.join(__dirname, nameModel),
         // Opciones de rendimiento:
-        nThreads: numCpus,      
+        nThreads: numCpus,
         nBatch: 1024, // tokens que procesa en paralelo 
         nCtx: 2048 // Para que tu chatbot recuerde más en la conversación
     });
+
+    // creamos sesion
+    const session = await createSession()
+
+    return session
+}
+
+export async function createSession() {
+
     const context = await model.createContext();
-    const session = new LlamaChatSession({ contextSequence: context.getSequence() });
-    const responseSession = await session.prompt(promptRules())
-
-    console.log("Response session: ", responseSession)
-
+    const session = new LlamaChatSession({
+        contextSequence: context.getSequence(),
+        systemPrompt: promptRules()   // reglas iniciales como "system"
+    });
     return session;
-
 }
 
