@@ -1,6 +1,5 @@
 import { getEmbedding } from '../helpers/embeddings.js'
 import { conversationHistory, MAX_MESSAGES } from '../config/constants.js'
-import { summarizeHistory } from '../helpers/historyMessages.js'
 import { isAmbiguousQuery, normalizeText, extractJSON } from '../helpers/queryUtils.js';
 import { noProductFindPrompt, recommendProductPrompt } from '../prompts/prompts.js';
 
@@ -64,8 +63,6 @@ export async function recommendProducts(query, hnsw, products, session) {
   ].slice(0, 3); // limitar top-10 de prodcutos
 
 
-  console.log("Productos Recomendados: ", recommended)
-
 
   // --- Si no hay coincidencias, usar LLM para respuesta amable ---
   if (recommended.length === 0) {
@@ -93,7 +90,10 @@ export async function recommendProducts(query, hnsw, products, session) {
   if (conversationHistory.length >= MAX_MESSAGES) {
     console.log("Historial muy largo, creando resumen...");
 
-    const summaryMessage = await summarizeHistory(conversationHistory, session);
+    const summaryPrompt = await summarizeHistory(conversationHistory, session);
+
+    const summary = await session.prompt(summaryPrompt);
+    const summaryMessage = {role: "system",content: `Resumen de la conversación: ${summary}`,};
 
     // Mantienes solo últimos 5 mensajes + el resumen
     const recentMessages = conversationHistory.slice(-5);
@@ -109,11 +109,18 @@ export async function recommendProducts(query, hnsw, products, session) {
 
 async function responsePrompt(session, prompt, conversationHistory) {
 
+   console.log("\x1b[31mResponsePrompt:\x1b[0m")
+   console.log("\x1b[31mPrompt:\x1b[0m", prompt)
+   console.log("\x1b[31mconversationHistory:\x1b[0m", conversationHistory)
+
   const raw = await session.prompt(prompt, {
     temperature: 0.5,
     top_p: 0.9,
     repeat_penalty: 1.5
   });
+
+  console.log("\x1b[31mRespuesta de IA:  \x1b[0m", raw)
+
 
   let data;
   try {

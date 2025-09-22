@@ -4,7 +4,7 @@
 export let conversationHistory = [];
 
 // Maxima cantidad de interraciones entre user y chatbot
-export const MAX_MESSAGES = 8; // recordar que es x2 los mensajes, los del usuario + chatbot
+export const MAX_MESSAGES = 10; // recordar que es x2 los mensajes, los del usuario + chatbot
 
 // frases legibles (puedes editar/agregar)
 export const AMBIGUOUS_QUERIES = [

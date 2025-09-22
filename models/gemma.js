@@ -28,7 +28,9 @@ export async function initModel() {
     });
     const context = await model.createContext();
     const session = new LlamaChatSession({ contextSequence: context.getSequence() });
-    await session.prompt(promptRules())
+    const responseSession = await session.prompt(promptRules())
+
+    console.log("Response session: ", responseSession)
 
     return session;
 
