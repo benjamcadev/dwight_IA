@@ -5,6 +5,13 @@ import os from "os";
 import { promptRules } from '../prompts/prompts.js';
 
 
+/* TOP MODELOS LLM
+ 1.gemma-2-2b-it.q4_k_m.gguf ---> Probado con tiempos desde 16s aprox
+ 2. llama-3.2-3b-instruct-q4_k_m.gguf --> 19 seg aprox
+ 3. 
+
+*/
+
 // Configuracion de rutas
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,7 +22,7 @@ const nameModel = 'gemma-2-2b-it.q4_k_m.gguf';
 
 export async function initModel() {
 
-    console.log("Cargando LLM llama-node con modelo gemma-2-2b-it.q4_k_m")
+    console.log("Cargando LLM llama-node con modelo " + nameModel)
 
     const numCpus = os.cpus().length; // Obtener cantidad de nucleos del proce
 
@@ -23,6 +30,8 @@ export async function initModel() {
     llama = await getLlama();
     model = await llama.loadModel({
         modelPath: path.join(__dirname, nameModel),
+        //tokenizerPath: tokenizerPath,
+        //tokenizerConfigPath: path.join(__dirname, "tokenizer_config.json"),
         // Opciones de rendimiento:
         nThreads: numCpus,
         nBatch: 1024, // tokens que procesa en paralelo 

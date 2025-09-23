@@ -19,6 +19,10 @@ dist-ssr
 models/gemma-2-2b-it.q4_k_m.gguf
 models/llama-3.2-3b-instruct-q4_k_m.gguf
 models/google_gemma-3-4b-it-q4_k_m.gguf
+models/gemma-3n-E2B-it-Q4_K_M.gguf
+models/google_gemma-3-1b-it-Q4_K_M.gguf
+models/Llama-3.2-3B-Instruct-IQ3_M.gguf
+models/Phi-3.5-mini-instruct-Q4_K_M.gguf
 
 # Editor directories and files
 .vscode/*
