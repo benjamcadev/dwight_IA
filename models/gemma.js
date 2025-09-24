@@ -35,7 +35,8 @@ export async function initModel() {
         // Opciones de rendimiento:
         nThreads: numCpus,
         nBatch: 1024, // tokens que procesa en paralelo 
-        nCtx: 2048 // Para que tu chatbot recuerde más en la conversación
+        nCtx: 2048, // Para que tu chatbot recuerde más en la conversación
+        gpuLayers: 10,
     });
 
     // creamos sesion
