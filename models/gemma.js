@@ -26,8 +26,8 @@ export async function initModel() {
     
 
     const numCpus = os.cpus().length; // Obtener cantidad de nucleos del proce
-
-    console.log("Servidor con " + numCpus + " Nucleos CPU")
+    const nBatch = numCpus <= 8 ? 1024 : 2048;
+    console.log("Servidor con " + numCpus + " Nucleos CPU, y nBatch : " + nBatch)
 
     // Configurar LLM local (llama-node)
     llama = await getLlama();
@@ -37,7 +37,7 @@ export async function initModel() {
         //tokenizerConfigPath: path.join(__dirname, "tokenizer_config.json"),
         // Opciones de rendimiento:
         nThreads: numCpus,
-        nBatch: 1024, // tokens que procesa en paralelo 
+        nBatch: nBatch, // tokens que procesa en paralelo 
         nCtx: 2048, // Para que tu chatbot recuerde más en la conversación
     });
 
