@@ -26,7 +26,7 @@ export async function initModel() {
     
 
     const numCpus = os.cpus().length; // Obtener cantidad de nucleos del proce
-    const nBatch = numCpus <= 8 ? 1024 : 3072;
+    const nBatch = numCpus <= 8 ? 1024 : 4096;
     console.log("Servidor con " + numCpus + " Nucleos CPU, y nBatch : " + nBatch)
 
     // Configurar LLM local (llama-node)
