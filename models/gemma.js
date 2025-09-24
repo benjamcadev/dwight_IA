@@ -23,8 +23,11 @@ const nameModel = 'gemma-2-2b-it.q4_k_m.gguf';
 export async function initModel() {
 
     console.log("Cargando LLM llama-node con modelo " + nameModel)
+    
 
     const numCpus = os.cpus().length; // Obtener cantidad de nucleos del proce
+
+    console.log("Servidor con " + numCpus + " Nucleos CPU")
 
     // Configurar LLM local (llama-node)
     llama = await getLlama();
@@ -36,7 +39,6 @@ export async function initModel() {
         nThreads: numCpus,
         nBatch: 1024, // tokens que procesa en paralelo 
         nCtx: 2048, // Para que tu chatbot recuerde más en la conversación
-        gpuLayers: 10,
     });
 
     // creamos sesion
