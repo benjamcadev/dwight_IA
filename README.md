@@ -52,3 +52,8 @@ En esta sección, esta el paso a paso de como pasar de node-llama-cpp (librería
 10. Probar: curl -X POST http://localhost:5000/completion \\
 
 \-H "Content-Type: application/json" \\
+
+Dato opcional: para correr el server llama.cpp con pm2 : 
+pm2 start ./bin/llama-server -- -m /ruta/al/modelo -t 16 --port 5000
+pm2 save
+pm2 status
