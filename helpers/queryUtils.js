@@ -36,20 +36,30 @@ export function normalizeText(s) {
 
 export function extractJSON(text) {
   try {
+    // Extraer bloque ```json ... ```
     const match = text.match(/```(?:json)?([\s\S]*?)```/i);
     let jsonString = match ? match[1].trim() : text.trim();
 
-    // 🛠 Normalizar comillas tipográficas a comillas dobles
-    jsonString = jsonString
-      .replace(/[“”]/g, '"') // reemplaza comillas dobles tipográficas
-      .replace(/[‘’]/g, "'"); // reemplaza comillas simples tipográficas
+    // Normalizar comillas tipográficas
+    jsonString = jsonString.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
 
-    // 🔧 Fix rápido: agregar comillas a keys sin comillas
-    jsonString = jsonString.replace(/(\w+):/g, '"$1":');
+    // Eliminar espacios extra antes de claves
+    jsonString = jsonString.replace(/"\s+(\w+)"/g, '"$1"');
+    jsonString = jsonString.replace(/(\w+)\s*:/g, '"$1":');
 
-    return JSON.parse(jsonString);
+    // Intentar parsear
+    try {
+      return JSON.parse(jsonString);
+    } catch {
+      // Si falla, cortar en el último } válido
+      const lastBrace = jsonString.lastIndexOf("}");
+      if (lastBrace !== -1) {
+        return JSON.parse(jsonString.substring(0, lastBrace + 1));
+      }
+      throw new Error("JSON incompleto o mal formado");
+    }
   } catch (err) {
-    console.error("❌ Error al parsear JSON:", err);
+    console.error("❌ Error al parsear JSON:", err, "\nRAW:", text);
     return null;
   }
 }
