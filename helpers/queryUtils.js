@@ -36,14 +36,18 @@ export function normalizeText(s) {
 
 export function extractJSON(text) {
   try {
-    // Captura lo que esté entre ```json ... ```
-    const match = text.match(/```json([\s\S]*?)```/);
-    if (match) {
-      return JSON.parse(match[1].trim());
-    }
+    const match = text.match(/```(?:json)?([\s\S]*?)```/i);
+    let jsonString = match ? match[1].trim() : text.trim();
 
-    // Si no tiene markdown, intenta parsear directo
-    return JSON.parse(text);
+    // 🛠 Normalizar comillas tipográficas a comillas dobles
+    jsonString = jsonString
+      .replace(/[“”]/g, '"') // reemplaza comillas dobles tipográficas
+      .replace(/[‘’]/g, "'"); // reemplaza comillas simples tipográficas
+
+    // 🔧 Fix rápido: agregar comillas a keys sin comillas
+    jsonString = jsonString.replace(/(\w+):/g, '"$1":');
+
+    return JSON.parse(jsonString);
   } catch (err) {
     console.error("❌ Error al parsear JSON:", err);
     return null;
