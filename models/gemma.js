@@ -58,8 +58,11 @@ export async function initModel() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    promptText,
-                    optionsPrompt
+                    prompt: promptText,
+                    n_predict: optionsPrompt?.n_predict ?? 100,
+                    temperature: optionsPrompt?.temperature ?? 0.5,
+                    top_p: optionsPrompt?.top_p ?? 0.9,
+                    repeat_penalty: optionsPrompt?.repeat_penalty ?? 1.5,
                 }),
             });
             const data = await res.json();
@@ -70,7 +73,7 @@ export async function initModel() {
         try {
             if (await verificarServidor()) {
                 return {
-                    session: prompt
+                    prompt
                 }
             } else {
                 throw new Error("Error de comunicacion con el servidor llama.cpp");
