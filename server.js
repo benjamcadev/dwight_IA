@@ -17,7 +17,7 @@ import { initModel } from './models/gemma.js';
 const hnsw = await initHnsw(products)
 
 
-// 2. Cargar modelo Gemma
+// 2. Cargar modelo LLM
 const session = await initModel()
 
 const app = express();
