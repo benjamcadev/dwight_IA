@@ -117,7 +117,7 @@ async function responsePrompt(session, prompt, conversationHistory) {
   console.log("\x1b[31mPrompt:\x1b[0m", prompt)
   console.log("\x1b[31mconversationHistory:\x1b[0m", conversationHistory)
 
-    const raw = session.prompt(prompt, {
+    const raw = await session.prompt(prompt, {
       //n_predict: 100,
       temperature: 0.5,
       top_p: 0.9,
