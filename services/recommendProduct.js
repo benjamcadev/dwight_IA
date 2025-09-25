@@ -91,7 +91,7 @@ export async function recommendProducts(query, hnsw, products, session) {
 
     const summaryPrompt = await summarizeHistory(conversationHistory);
 
-    const summary = await session.prompt(summaryPrompt);
+    const summary = await session.prompt(summaryPrompt, {top_p: 0.9});
     const summaryMessage = { role: "system", content: `Resumen de la conversación: ${summary}`, };
 
     // Mantienes solo últimos 2 mensajes + el resumen
