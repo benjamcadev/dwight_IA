@@ -59,7 +59,7 @@ export async function initModel() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     prompt: promptText,
-                    n_predict: optionsPrompt?.n_predict ?? 350,
+                    n_predict: optionsPrompt?.n_predict ?? 500,
                     temperature: optionsPrompt?.temperature ?? 0.5,
                     top_p: optionsPrompt?.top_p ?? 0.9,
                     repeat_penalty: optionsPrompt?.repeat_penalty ?? 1.5,
