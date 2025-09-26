@@ -36,18 +36,18 @@ export function normalizeText(s) {
 
 export function extractJSON(text) {
   try {
-    // Extraer bloque ```json ... ```
     const match = text.match(/```(?:json)?([\s\S]*?)```/i);
     let jsonString = match ? match[1].trim() : text.trim();
 
-    // Normalizar comillas tipográficas
+    // 1️⃣ Normalizar comillas tipográficas
     jsonString = jsonString.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
 
-    // Eliminar espacios extra antes de claves
-    jsonString = jsonString.replace(/"\s+(\w+)"/g, '"$1"');
-    jsonString = jsonString.replace(/(\w+)\s*:/g, '"$1":');
+    // 2️⃣ Limpiar espacios extra antes de claves y valores
+    jsonString = jsonString.replace(/"\s+(\w+)"/g, '"$1"'); // claves
+    jsonString = jsonString.replace(/:\s+"/g, ':"');          // valores
+    jsonString = jsonString.replace(/\s+"/g, '"');            // valores iniciales
 
-    // Intentar parsear
+    // 3️⃣ Intentar parsear
     try {
       return JSON.parse(jsonString);
     } catch {
