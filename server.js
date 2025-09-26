@@ -19,7 +19,6 @@ const hnsw = await initHnsw(products)
 
 // 2. Cargar modelo LLM
 const session = await initModel()
-console.log(session)
 
 const app = express();
 app.use(cors());
