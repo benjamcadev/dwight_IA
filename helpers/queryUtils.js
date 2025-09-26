@@ -1,5 +1,5 @@
 import { AMBIGUOUS_QUERIES } from '../config/constants.js'
-
+import { jsonrepair } from "jsonrepair";
 
 export function isAmbiguousQuery(query) {
   if (!query) return false;
@@ -36,30 +36,18 @@ export function normalizeText(s) {
 
 export function extractJSON(text) {
   try {
-    const match = text.match(/```(?:json)?([\s\S]*?)```/i);
-    let jsonString = match ? match[1].trim() : text.trim();
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    if (start === -1 || end === -1) return null;
 
-    // 1️⃣ Normalizar comillas tipográficas
-    jsonString = jsonString.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+    const rawJson = text.slice(start, end + 1);
 
-    // 2️⃣ Limpiar espacios extra antes de claves y valores
-    jsonString = jsonString.replace(/"\s+(\w+)"/g, '"$1"'); // claves
-    jsonString = jsonString.replace(/:\s+"/g, ':"');          // valores
-    jsonString = jsonString.replace(/\s+"/g, '"');            // valores iniciales
+    // Repara errores comunes (comillas malas, objetos cortados, etc.)
+    const fixedJson = jsonrepair(rawJson);
 
-    // 3️⃣ Intentar parsear
-    try {
-      return JSON.parse(jsonString);
-    } catch {
-      // Si falla, cortar en el último } válido
-      const lastBrace = jsonString.lastIndexOf("}");
-      if (lastBrace !== -1) {
-        return JSON.parse(jsonString.substring(0, lastBrace + 1));
-      }
-      throw new Error("JSON incompleto o mal formado");
-    }
+    return JSON.parse(fixedJson);
   } catch (err) {
-    console.error("❌ Error al parsear JSON:", err, "\nRAW:", text);
+    console.error("❌ Error al reparar/parsear JSON:", err);
     return null;
   }
 }
