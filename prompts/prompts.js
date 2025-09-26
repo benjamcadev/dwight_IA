@@ -12,7 +12,7 @@ Productos recomendados: (Cada producto va separado por un punto y coma):
     ${recommended.map(p => "Nombre: " + p.name + ", Descripcion: " + p.description +
     ", Informacion Adicional: " + p.additional_information + ", Categoria: " + p.category +
     ", Precio: " + p.price + ", Url: " + p.link + ", Imagen: " + p.image).join("; ")}
- Responde en formato JSON exacto con este esquema:  
+ Responde en formato JSON válido. Todas las claves con comillas dobles rectas, sin espacios iniciales, y todos los objetos correctamente cerrados. No uses saltos de línea dentro de strings de URLs, exacto como este esquema: 
         {
         "answer": "Texto explicativo de la respuesta",
         "products": [
