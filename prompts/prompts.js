@@ -13,18 +13,7 @@ Productos recomendados: (Cada producto va separado por un punto y coma):
     ${recommended.map(p => "Nombre: " + p.name + ", Descripcion: " + p.description +
     ", Informacion Adicional: " + p.additional_information + ", Categoria: " + p.category +
     ", Precio: " + p.price + ", Url: " + p.link + ", Imagen: " + p.image).join("; ")}
- Responde en formato JSON válido, exacto como este esquema: 
-        {
-        "answer": "Texto explicativo de la respuesta",
-        "products": [
-          {
-            "name": "Nombre del producto",
-            "url": "Url al producto",
-            "image": "Link a la imagen"
-          }
-        ],
-        "closing": "Texto cierre de respuesta"
-        }
+ 
     `
 }
 

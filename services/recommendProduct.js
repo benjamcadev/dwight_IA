@@ -105,13 +105,13 @@ export async function recommendProducts(query, hnsw, products, session) {
 
   }
 
-  const objectResponse = await responsePrompt(session, prompt, conversationHistory)
+  const objectResponse = await responsePrompt(session, prompt, conversationHistory, recommended)
 
   return objectResponse;
 
 }
 
-async function responsePrompt(session, prompt, conversationHistory) {
+async function responsePrompt(session, prompt, conversationHistory, recommended) {
 
   console.log("\x1b[31mResponsePrompt:\x1b[0m")
   console.log("\x1b[31mPrompt:\x1b[0m", prompt)
@@ -128,17 +128,28 @@ async function responsePrompt(session, prompt, conversationHistory) {
 
 
   let data;
+  const objectResponse = {
+    answer: '',
+    products: [],
+    closing: ''
+  }
   try {
-    data = extractJSON(raw);
+    //data = extractJSON(raw);
+    objectResponse.answer = raw;
+    objectResponse.products = recommended;
+    objectResponse.closing = ''
+   /* objectResponse = {
+    answer: raw,
+    products: recommended ? recommended : [],
+    closing:  ''
+  }
+    */
+
   } catch (error) {
     data = { answer: error, products: [], closing: "" };
   }
 
-  const objectResponse = {
-    answer: data.answer,
-    products: data.products ? data.products : [],
-    closing: data.closing ? data.closing : ''
-  }
+  
 
   console.log("RESPUESTA EN OBJECT : ", objectResponse)
 

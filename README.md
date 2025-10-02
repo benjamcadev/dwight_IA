@@ -54,6 +54,6 @@ En esta sección, esta el paso a paso de como pasar de node-llama-cpp (librería
 \-H "Content-Type: application/json" \\
 
 Dato opcional: para correr el server llama.cpp con pm2 : 
-pm2 start ./bin/llama-server -- -m /ruta/al/modelo -t 16 --port 5000
+pm2 start ./bin/llama-server -- -m /ruta/al/modelo -c 4096 -t 16 --port 5000
 pm2 save
 pm2 status
