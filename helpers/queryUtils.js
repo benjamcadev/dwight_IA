@@ -34,20 +34,4 @@ export function normalizeText(s) {
     .trim();
 }
 
-export function extractJSON(text) {
-  try {
-    const start = text.indexOf("{");
-    const end = text.lastIndexOf("}");
-    if (start === -1 || end === -1) return null;
 
-    const rawJson = text.slice(start, end + 1);
-
-    // Repara errores comunes (comillas malas, objetos cortados, etc.)
-    const fixedJson = jsonrepair(rawJson);
-
-    return JSON.parse(fixedJson);
-  } catch (err) {
-    console.error("❌ Error al reparar/parsear JSON:", err);
-    return null;
-  }
-}

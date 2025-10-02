@@ -91,7 +91,7 @@ export async function recommendProducts(query, hnsw, products, session) {
 
     const summaryPrompt = await summarizeHistory(conversationHistory);
 
-    const summary = await session.prompt(summaryPrompt, {top_p: 0.9});
+    const summary = await session.prompt(summaryPrompt, { top_p: 0.9 });
     const summaryMessage = { role: "system", content: `Resumen de la conversación: ${summary}`, };
 
     // Mantienes solo últimos 2 mensajes + el resumen
@@ -117,12 +117,12 @@ async function responsePrompt(session, prompt, conversationHistory, recommended)
   console.log("\x1b[31mPrompt:\x1b[0m", prompt)
   console.log("\x1b[31mconversationHistory:\x1b[0m", conversationHistory)
 
-    const raw = await session.prompt(prompt, {
-      temperature: 0.5,
-      top_p: 0.9,
-      repeat_penalty: 1.5
-    })
-  
+  const raw = await session.prompt(prompt, {
+    temperature: 0.5,
+    top_p: 0.9,
+    repeat_penalty: 1.5
+  })
+
 
   console.log("\x1b[31mRespuesta de IA:  \x1b[0m", raw)
 
@@ -134,22 +134,24 @@ async function responsePrompt(session, prompt, conversationHistory, recommended)
     closing: ''
   }
   try {
-    //data = extractJSON(raw);
+   
+    //eliminar data que no nos interesa enviar al front
+    const recommendedClean = recommended.map(({ embedding, score, ...rest }) => rest);
     objectResponse.answer = raw;
-    objectResponse.products = recommended;
+    objectResponse.products = recommendedClean;
     objectResponse.closing = ''
-   /* objectResponse = {
-    answer: raw,
-    products: recommended ? recommended : [],
-    closing:  ''
-  }
-    */
+    /* objectResponse = {
+     answer: raw,
+     products: recommended ? recommended : [],
+     closing:  ''
+   }
+     */
 
   } catch (error) {
     data = { answer: error, products: [], closing: "" };
   }
 
-  
+
 
   console.log("RESPUESTA EN OBJECT : ", objectResponse)
 
