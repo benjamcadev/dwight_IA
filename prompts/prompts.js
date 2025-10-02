@@ -8,10 +8,10 @@ Mantén la conversación en español, clara y amigable.
 Ten en cuenta le historial de la conversacion para contexto:
 ${conversationHistory.map(h => h.role + ": " + h.content + "")}
 
-De la lista de a continuacion recomienda al menos 3 productos si existen.
-Productos recomendados: (Cada producto va separado por un punto y coma): 
-    ${recommended.map(p => "Nombre: " + p.name + ", Descripcion: " + p.description +
-    ", Categoria: " + p.category).join("; ")}
+Debes recomendar al menos 3 productos de la siguiente lista.
+Productos recomendados:
+${recommended.map((p, i) => `${i + 1}. Nombre: ${p.name}, Descripción: ${p.description}, Categoría: ${p.category}`).join("\n")}
+
  [/INST]
     `
 }
