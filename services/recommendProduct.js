@@ -135,7 +135,8 @@ async function responsePrompt(session, prompt, conversationHistory, recommended)
   }
   try {
     // limpiando respuesta de encabezados como **solucion**
-   const cleanRaw = raw.replace(/(\*\*)?(Solución|Respuesta):(\*\*)?\s*/gi, '');
+   const cleanRaw = raw.replace(/(\*\*)?(Solución|Respuesta|Recomendación):(\*\*)?\s*/gi, '');
+
     //eliminar data que no nos interesa enviar al front
     const recommendedClean = recommended.map(({ embedding, score, ...rest }) => rest);
     objectResponse.answer = cleanRaw;
