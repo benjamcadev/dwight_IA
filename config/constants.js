@@ -4,7 +4,7 @@ import os from "os";
 export let conversationHistory = [];
 
 // Obtener cantidad de nucleos del proce
-export const numCpus = os.cpus().length; 
+export const numCpus = 8 //os.cpus().length; 
 
 // Maxima cantidad de interraciones entre user y chatbot
 export const MAX_MESSAGES = 10; // recordar que es x2 los mensajes, los del usuario + chatbot
