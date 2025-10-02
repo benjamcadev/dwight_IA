@@ -10,10 +10,8 @@ ${conversationHistory.map(h => h.role + ": " + h.content + "")}
 
 Debes recomendar al menos 3 productos de la siguiente lista.
 Productos recomendados:
-${recommended.map((p, i) => `${i + 1}. Nombre: ${p.name}, Descripción: ${p.description}, Categoría: ${p.category}`).join("\n")}
-Responde sin agregar títulos, encabezados ni palabras como "Solución"
-[/INST]
-    `
+${recommended.map((p, i) => `${i + 1}. Nombre: ${p.name}, Descripción: ${p.description}, Categoría: ${p.category}`).join("\n")}"
+[/INST]`
 }
 
 export const summarizeHistory = async (conversationHistory) => {
