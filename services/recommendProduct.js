@@ -155,9 +155,9 @@ async function responsePrompt(session, prompt, conversationHistory, recommended)
 
   console.log("RESPUESTA EN OBJECT : ", objectResponse)
 
-  //  Guardar respuesta en historial
-  //conversationHistory.push({ role: "assistant", content: objectResponse.answer + " Productos: " + objectResponse.products.map(p => p.name).join(";") });
-  conversationHistory.push({ role: "assistant", content: objectResponse.answer });
+  //  Guardar respuesta en historial y limpiar de saltos de lineas la respuesta de la ia
+  const cleanResponseIa = objectResponse.answer.replace(/\n/g, ' ')
+  conversationHistory.push({ role: "assistant", content: cleanResponseIa });
 
   return objectResponse
 }
