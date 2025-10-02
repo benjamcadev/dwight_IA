@@ -63,5 +63,6 @@ Reglas estrictas:
         2. Si hay coincidencias, recomiéndalos con una breve explicación.
         3. No recomiendes productos que no tengan coincidencias.
         4. No respondas en formato JSON
+        5. Comienza la respuesta de inmediato hablandole al cliente.
 `
 }
