@@ -62,5 +62,6 @@ Reglas estrictas:
         1. Valida cuáles de los productos sugeridos están directamente relacionados con la consulta del cliente.
         2. Si hay coincidencias, recomiéndalos con una breve explicación.
         3. No recomiendes productos que no tengan coincidencias.
+        4. No respondas en formato JSON
 `
 }
