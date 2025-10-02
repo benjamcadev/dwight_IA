@@ -1,7 +1,7 @@
 
 export const recommendProductPrompt = async (query, recommended, conversationHistory) => {
 
-  return `
+  return `[INST]
 Eres un asistente que recomienda productos en una tienda. ${conversationHistory.length <= 1 ? 'Saluda al usuario de manera amable y responde a su consulta.' : 'No es necesario que saludes, ya que tienes una conversacion iniciada con el cliente.'}
 Pregunta del cliente: "${query}" 
 Mantén la conversación en español, clara y amigable.
@@ -12,7 +12,7 @@ De la lista de a continuacion recomienda al menos 3 productos si existen.
 Productos recomendados: (Cada producto va separado por un punto y coma): 
     ${recommended.map(p => "Nombre: " + p.name + ", Descripcion: " + p.description +
     ", Categoria: " + p.category).join("; ")}
- 
+ [/INST]
     `
 }
 
