@@ -37,14 +37,7 @@ export const summarizeHistory = async (conversationHistory) => {
 export const noProductFindPrompt = async (query) => {
   return `
 Eres un asistente de tienda. el cliente pregunto lo siguiente: ${query}.
-Responde claramente y amablemente que no vendemos lo que esta buscando.
-
-Responde en formato JSON exacto con este esquema:  
-        {
-        "answer": "Texto explicativo de la respuesta",
-        "products": [],
-        "closing": "Texto cierre de respuesta"
-        }
+Responde amablemente que no vendemos lo que esta buscando y no agregues alguna pregunta al cierre.
     `
 }
 
@@ -53,6 +46,7 @@ export const promptRules = () => {
 Eres un asistente que recomienda productos en una tienda.
 Reglas estrictas:
 - No hagas preguntas adicionales sobre especificaciones, precios u otros temas.
+- Valida que los productos recomendados en el prompt tengan relacion con la pregunta del cliente, si no tiene relacion contesta que no tenemos el producto de forma amable
 - Cierra siempre la respuesta con una frase amable que invite al cliente a seguir consultando. 
   Ejemplos de frases de cierre:
   - "¿Necesita algo más en lo que pueda ayudar?"

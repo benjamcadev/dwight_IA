@@ -45,13 +45,15 @@ export async function recommendProducts(query, hnsw, products, session) {
       return { ...p, score: cosineSimilarity(queryVector, p.embedding) };
     });
 
+
+
   // Filtrar por umbral mínimo
-  const threshold = 0.81;
+  const threshold = 0.82;
   recommendedByHNSW = recommendedByHNSW
     .filter(p => p.score >= threshold)
     .sort((a, b) => b.score - a.score);
 
-  // 4Opcional: si quieres también usar scoredProducts (todo el catálogo)
+  // Opcional: si quieres también usar scoredProducts (todo el catálogo)
   // Solo si tienes pocos productos o quieres máxima exhaustividad
   const recommendedByScore = scoredProducts
     .filter(p => p.score >= threshold)
@@ -68,7 +70,7 @@ export async function recommendProducts(query, hnsw, products, session) {
   // --- Si no hay coincidencias, usar LLM para respuesta amable ---
   if (recommended.length === 0) {
     const llmPrompt = await noProductFindPrompt(query);
-    const objectResponse = await responsePrompt(session, llmPrompt, conversationHistory)
+    const objectResponse = await responsePrompt(session, llmPrompt, conversationHistory, recommended)
 
     return objectResponse;
   }
@@ -135,13 +137,16 @@ async function responsePrompt(session, prompt, conversationHistory, recommended)
   }
   try {
     // limpiando respuesta de encabezados como **solucion**
-   const cleanRaw = raw.replace(/(\*\*)?(Solución|Respuesta|Recomendación):(\*\*)?\s*/gi, '');
+    const cleanRaw = raw.replace(/(\*\*)?(Solución|Respuesta|Recomendación):(\*\*)?\s*/gi, '');
 
+    console.log("Recommended: ", recommended)
+
+   
     //eliminar data que no nos interesa enviar al front
     const recommendedClean = recommended.map(({ embedding, score, ...rest }) => rest);
     objectResponse.answer = cleanRaw;
     objectResponse.products = recommendedClean;
-    objectResponse.closing = ''
+    objectResponse.closing = recommendedClean.length == 0 ? '¿ Te puedo ayudar en algo mas ?' : ''
     /* objectResponse = {
      answer: raw,
      products: recommended ? recommended : [],
