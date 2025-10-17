@@ -24,6 +24,7 @@ export async function initHnsw(products) {
       const textProduct = `${product.name}. ${product.description || ""}. ${product.additional_information || ""}. Categoría: ${product.category || ""}. Tags: ${product.tag || ""}`;
       const vector = await getEmbedding(textProduct);
       product.embedding = vector; // Guardar embedding en el producto
+      
       return { id: product.id, vector };
     }));
 

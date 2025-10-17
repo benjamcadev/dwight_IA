@@ -3,22 +3,28 @@ import bodyParser from "body-parser";
 import cors from "cors";
 
 
+
 //BD de prueba json
-import fs from 'fs';
+/*import fs from 'fs';
 const raw = fs.readFileSync('./db/products_agro_prueba.json', 'utf-8');
-const products = JSON.parse(raw);
+const products = JSON.parse(raw);*/
 
 import { initHnsw } from './models/initHnsw.js';
 import { recommendProducts } from './services/recommendProduct.js'
 import { initModel } from './models/gemma.js';
+import { getProductsStrapi, convertProducts } from './db/getData.js'
 
 
-// 1. Indexar a vectores los productos desde la bd
-const hnsw = await initHnsw(products)
 
+// Obtener productos desde Strapi y convertirlos al formato esperado
+const productsStrapiRaw = await getProductsStrapi();
+const productsStrapi = convertProducts(productsStrapiRaw);
 
-// 2. Cargar modelo LLM
-const session = await initModel()
+// Indexar a vectores los productos desde Strapi (con embeddings)
+const hnsw = await initHnsw(productsStrapi);
+
+// Cargar modelo LLM
+const session = await initModel();
 
 const app = express();
 app.use(cors());
@@ -33,7 +39,9 @@ app.post("/chat", async (req, res) => {
        return res.status(422).json({ error: "El campo 'query' no puede estar vacio"})
     }
 
-    const response = await recommendProducts(query, hnsw, products, session);
+
+  // Usar productos de Strapi ya convertidos y con embeddings
+  const response = await recommendProducts(query, hnsw, productsStrapi, session);
 
   
     return res.json({ response });
