@@ -22,9 +22,9 @@ const nameModel = 'gemma-2-2b-it.q4_k_m.gguf';
 
 export async function initModel() {
 
-    numCpus = 8; // forzar a cargar con node-llama
+     // forzar a cargar con node-llama poniendo 16 nucleos en el if
 
-    if (numCpus <= 8) {
+    if (numCpus <= 16) {
 
         // ----- CORREMOS CON node-llama-cpp ------ //
         console.log("Servidor con " + numCpus)
