@@ -17,6 +17,9 @@ export async function initHnsw(products) {
     const space = "cosine";
     const hnsw = new HierarchicalNSW(space, dim);
 
+    const NUM_THREADS = 16;
+    hnsw.setMaxThreads(NUM_THREADS);
+
     hnsw.initIndex(products.length);
 
     // Agregar productos al índice con HNSW
@@ -24,7 +27,7 @@ export async function initHnsw(products) {
       const textProduct = `${product.name}. ${product.description || ""}. ${product.additional_information || ""}. Categoría: ${product.category || ""}. Tags: ${product.tag || ""}`;
       const vector = await getEmbedding(textProduct);
       product.embedding = vector; // Guardar embedding en el producto
-      
+
       return { id: product.id, vector };
     }));
 
