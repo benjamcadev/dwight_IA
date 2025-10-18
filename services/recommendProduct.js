@@ -70,25 +70,25 @@ export async function recommendProducts(query, hnsw, products, session) {
   // --- Si no hay coincidencias, usar LLM para respuesta amable ---
   if (recommended.length === 0) {
     const llmPrompt = await noProductFindPrompt(query);
-    const objectResponse = await responsePrompt(session, llmPrompt, conversationHistory, recommended)
+    const objectResponse = await responsePrompt(session, llmPrompt, recommended)
 
     return objectResponse;
   }
 
   // Guardar en historial la consulta del usuario
-  conversationHistory.push({ role: "user", content: query });
+  //conversationHistory.push({ role: "user", content: query });
 
   // Armar prompt con TODO el historial
   let prompt;
 
   try {
-    prompt = await recommendProductPrompt(query, recommended, conversationHistory);
+    prompt = await recommendProductPrompt(query, recommended);
   } catch (error) {
     console.log("Hubo error al recommendProdcuts: ", error)
   }
 
   // Valida la cantidad de interacciones entre user y chatbot
-  if (conversationHistory.length >= MAX_MESSAGES) {
+  /*if (conversationHistory.length >= MAX_MESSAGES) {
     console.log("\x1b[31mHistorial muy largo, creando resumen...\x1b[0m")
 
     const summaryPrompt = await summarizeHistory(conversationHistory);
@@ -105,19 +105,19 @@ export async function recommendProducts(query, hnsw, products, session) {
     console.log("\x1b[31mReiniciando modelo LLM...\x1b[0m")
     session = await createSession();
 
-  }
+  }*/
 
-  const objectResponse = await responsePrompt(session, prompt, conversationHistory, recommended)
+  const objectResponse = await responsePrompt(session, prompt, recommended)
 
   return objectResponse;
 
 }
 
-async function responsePrompt(session, prompt, conversationHistory, recommended) {
+async function responsePrompt(session, prompt, recommended) {
 
   console.log("\x1b[31mResponsePrompt:\x1b[0m")
   console.log("\x1b[31mPrompt:\x1b[0m", prompt)
-  console.log("\x1b[31mconversationHistory:\x1b[0m", conversationHistory)
+  //console.log("\x1b[31mconversationHistory:\x1b[0m", conversationHistory)
 
   const raw = await session.prompt(prompt, {
     temperature: 0.5,
@@ -163,8 +163,8 @@ async function responsePrompt(session, prompt, conversationHistory, recommended)
   console.log("RESPUESTA EN OBJECT : ", objectResponse)
 
   //  Guardar respuesta en historial y limpiar de saltos de lineas la respuesta de la ia
-  const cleanResponseIa = objectResponse.answer.replace(/\n/g, ' ')
-  conversationHistory.push({ role: "assistant", content: cleanResponseIa });
+  //const cleanResponseIa = objectResponse.answer.replace(/\n/g, ' ')
+  //conversationHistory.push({ role: "assistant", content: cleanResponseIa });
 
   return objectResponse
 }

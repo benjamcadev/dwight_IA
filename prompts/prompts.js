@@ -1,12 +1,10 @@
 
-export const recommendProductPrompt = async (query, recommended, conversationHistory) => {
+export const recommendProductPrompt = async (query, recommended) => {
 
   return `[INST]
-Eres un asistente que recomienda productos en una tienda. ${conversationHistory.length <= 1 ? 'Saluda al usuario de manera amable y responde a su consulta.' : 'No es necesario que saludes, ya que tienes una conversacion iniciada con el cliente.'}
+Eres un asistente que recomienda productos en una tienda, responde de forma amable al cliente.}
 Pregunta del cliente: "${query}" 
 Mantén la conversación en español, clara y amigable.
-Ten en cuenta le historial de la conversacion para contexto:
-${conversationHistory.map(h => h.role + ": " + h.content + "")}
 
 Debes recomendar al menos 3 productos de la siguiente lista.
 Productos recomendados:
@@ -14,7 +12,7 @@ ${recommended.map((p, i) => `${i + 1}. Nombre: ${p.name}, Descripción: ${p.desc
 [/INST]`
 }
 
-export const summarizeHistory = async (conversationHistory) => {
+/*export const summarizeHistory = async (conversationHistory) => {
 
   const textToSummarize = conversationHistory
     .map(m => `${m.role}: ${m.content}`)
@@ -32,7 +30,7 @@ export const summarizeHistory = async (conversationHistory) => {
     `;
 
   return prompt
-}
+}*/
 
 export const noProductFindPrompt = async (query) => {
   return `
