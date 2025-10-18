@@ -17,21 +17,6 @@ export async function initHnsw(products) {
     const space = "cosine";
     const hnsw = new HierarchicalNSW(space, dim);
 
-    // **** CAMBIO AQUÍ ****
-    const NUM_THREADS = 16;
-    
-    // initIndex(maxElements, M, efConstruction, randomSeed, allow_replace_deleted, num_threads)
-    // Pasamos undefined para los parámetros opcionales que no queremos cambiar, excepto el último.
-    hnsw.initIndex(
-      products.length,     // 1. maxElements (Tu valor)
-      undefined,           // 2. M (M por defecto)
-      undefined,           // 3. efConstruction (efConstruction por defecto)
-      undefined,           // 4. randomSeed (randomSeed por defecto)
-      undefined,           // 5. allow_replace_deleted (por defecto)
-      NUM_THREADS          // 6. num_threads (¡TU VALOR!)
-    );
-    // **********************
-
     hnsw.initIndex(products.length);
 
     // Agregar productos al índice con HNSW
@@ -39,7 +24,7 @@ export async function initHnsw(products) {
       const textProduct = `${product.name}. ${product.description || ""}. ${product.additional_information || ""}. Categoría: ${product.category || ""}. Tags: ${product.tag || ""}`;
       const vector = await getEmbedding(textProduct);
       product.embedding = vector; // Guardar embedding en el producto
-
+      
       return { id: product.id, vector };
     }));
 
