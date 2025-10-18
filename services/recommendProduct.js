@@ -1,7 +1,7 @@
 import { getEmbedding } from '../helpers/embeddings.js'
 import { conversationHistory, MAX_MESSAGES } from '../config/constants.js'
 import { isAmbiguousQuery, normalizeText } from '../helpers/queryUtils.js';
-import { noProductFindPrompt, recommendProductPrompt, summarizeHistory } from '../prompts/prompts.js';
+import { noProductFindPrompt, recommendProductPrompt } from '../prompts/prompts.js';
 import { createSession } from '../models/gemma.js'
 import { numCpus } from '../config/constants.js';
 
