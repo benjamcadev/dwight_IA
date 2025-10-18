@@ -22,6 +22,8 @@ const nameModel = 'gemma-2-2b-it.q4_k_m.gguf';
 
 export async function initModel() {
 
+    numCpus = 8; // forzar a cargar con node-llama
+
     if (numCpus <= 8) {
 
         // ----- CORREMOS CON node-llama-cpp ------ //
